@@ -33,7 +33,7 @@ function ClientNav() {
 
                 <Button className="">
                         
-                    <a href="/auth/log in">
+                    <a href="/auth/login">
                     Login
                     </a>
                 </Button>
@@ -67,7 +67,10 @@ function ClientNav() {
                     <button className="absolute -top-2 -right-3 text-xs text-white bg-[#c8ad93] w-[18px] h-[18px] rounded-full">3</button>
                 </a>
                 <Button className="-ml-1">
+                    <a href="/auth/login">
                     Login
+                    </a>
+
                 </Button>
                 
             </div>

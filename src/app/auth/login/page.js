@@ -3,10 +3,34 @@ import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react'; // Using lucide-react for cleaner icons
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import axios from 'axios';
+
 
 const page = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formdata,setFormdata]=useState(
+   { email  :"",
+    password:""}
+)
 
+  const handleLogin=async(e)=>{
+    e.preventDefault();
+    try{
+      const response =await axios.post('http://127.0.0.1:8000/api/auth/login',formdata)
+      const token=response.data.access_token
+      localStorage.setItem("token",token)
+      console.log(response)
+    }catch(error){
+      console.log(error)
+    }
+  }
+  const handleChange=(e)=>{
+    setFormdata({
+      ...formdata,
+      [e.target.name]:e.target.value
+    })
+
+  }
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -19,11 +43,13 @@ const page = () => {
           <h2 className="font-bold text-3xl text-[#1e3753]">Login</h2>
           <p className="text-sm mt-4 text-[#1e3753]">If you are already a member, easily log in now.</p>
 
-          <form action="" className="flex flex-col gap-4 pt-7">
+          <form onSubmit={handleLogin} className="flex flex-col gap-4 pt-7">
             <Input 
                type="email" 
               name="email" 
               placeholder="Email" 
+              onChange={handleChange}
+              value={formdata.email}
               required
             />
             
@@ -32,6 +58,8 @@ const page = () => {
                  type={showPassword ? "text" : "password"} 
                 name="password" 
                 placeholder="Password" 
+                onChange={handleChange}
+                value={formdata.password}
                 required
               />
               <button
