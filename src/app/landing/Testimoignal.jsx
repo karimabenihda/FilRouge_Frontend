@@ -90,7 +90,13 @@ function Testimoignal() {
             
             </div>
 
+         <div className='text-center'>
+<p className=" text-sm font-medium text-[#c8ad93]">Blogs</p>
+ <h1 className="text-3xl pb-5 font-semibold text-center text-[#1e3753]">
+Clients expriences with ELan
+</h1> 
                 <SocialMedia/>
+         </div>
 
           
         </>

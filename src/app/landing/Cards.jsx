@@ -10,7 +10,7 @@ function Cards() {
       title: "Living Room",
       text: "Sofas and tables designed for comfort and shared moments.",
       label: "Comfort & Style",
-      img: "/images/pic3.jfif",
+      img: "/images/bg/dining.jfif",
       gradient: "from-black/80 via-black/40 to-transparent",
     },
     {
@@ -18,7 +18,7 @@ function Cards() {
       title: "Office",
       text: "Smart furniture built for focus and productivity.",
       label: "Work Smart",
-      img: "/images/pic2.jfif",
+      img: "/images/bg/office.jfif",
       gradient: "from-[#1e3753]/90 via-[#1e3753]/50 to-transparent",
     },
     {
@@ -26,7 +26,7 @@ function Cards() {
       title: "Bedroom",
       text: "Calm, cozy pieces for better rest and relaxation.",
       label: "Rest & Relax",
-      img: "/images/pic4.jfif",
+      img: "/images/bg/bedroom.jfif",
       gradient: "from-black/80 via-black/40 to-transparent",
     },
   ];
@@ -51,7 +51,7 @@ function Cards() {
 
             <div className="flex-1">
               <img
-                src="/images/pic4.jfif"
+                src="/images/bg/livingroom.jfif"
                 alt="dining furniture"
                 className="rounded-xl object-cover w-full h-48"
               />

@@ -62,11 +62,14 @@ function SocialMedia() {
     );
 
     return (
+         <>
+
         <div className="max-w-6xl mx-auto flex flex-wrap">
             {posts.map((post, index) => (
                 <PostCard key={index} post={post} />
             ))}
         </div>
+        </>
     );
 }
 

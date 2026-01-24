@@ -7,7 +7,7 @@ function Hero() {
   return (
     <div>
         <div>
-            <section style={{ backgroundImage: "url('/images/hero_11zon.webp')" }}
+            <section style={{ backgroundImage: "url('/images/bg/hero.webp')" }}
  className="flex flex-col items-center pb-48 text-center text-sm text-white max-md:px-2 bg-cover bg-center">
             <ClientNav/>
                 <div className="flex flex-wrap items-center justify-center p-1.5 mt-24 md:mt-28 rounded-full border border-slate-400 text-xs">

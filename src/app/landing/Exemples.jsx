@@ -10,9 +10,9 @@ function Exemples() {
   const categories = {
     Living: {
       slides: [
-        "/images/exempls/sofa.jfif",
-        "/images/exempls/living.jpg",
-        "/images/exempls/living.jpg",
+        "/images/exempls/living/living1.jfif",
+        "/images/exempls/living/living2.jfif",
+        "/images/exempls/living/living3.jfif",
       ],
       title: "Living Room Collection",
       description:
@@ -20,9 +20,9 @@ function Exemples() {
     },
     Bedroom: {
       slides: [
-        "/images/exempls/bed1.jpg",
-        "/images/exempls/bed2.jpg",
-        "/images/exempls/bed3.jpg",
+        "/images/exempls/bedroom/bedroom.jfif",
+        "/images/exempls/bedroom/bedroom2.jfif",
+        "/images/exempls/bedroom/bedroom3.jfif",
       ],
       title: "Bedroom Collection",
       description:
@@ -50,9 +50,9 @@ function Exemples() {
     },
     Decor: {
       slides: [
-        "/images/exempls/decor1.jpg",
-        "/images/exempls/decor2.jpg",
-        "/images/exempls/decor3.jpg",
+        "/images/exempls/decor/decor.jfif",
+        "/images/exempls/decor/decor2.jfif",
+        "/images/exempls/decor/decor3.jfif",
       ],
       title: "Home Decor Collection",
       description:
@@ -81,6 +81,7 @@ function Exemples() {
   return (
     <div className="max-w-6xl mx-auto">
       {/* Categories */}
+
       <div className="flex justify-end mb-4">
         <div className="flex flex-wrap gap-2">
           {Object.keys(categories).map((cat, i) => (

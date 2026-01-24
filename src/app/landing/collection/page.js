@@ -61,10 +61,14 @@ export default function ChairsPage() {
               className="pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
             />
           </div>
-          <button className="text-gray-700 hover:text-black transition-colors">
+          <a href='/landing/cart' className="text-gray-700 hover:text-black transition-colors">
             <ShoppingCart size={22} />
-          </button>
-          <Button>Login</Button>
+          </a>
+          <Button>
+            <a href="/auth/login">
+            Login
+            </a>
+            </Button>
         </div>
       </nav>
 
