@@ -27,8 +27,50 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Plus, Pencil, Trash2 } from "lucide-react"
+import axios from "axios"
+import { useState ,useEffect} from "react"
 
 export default function FurnituresPage() {
+  const [formdata,setFormdata]=useState(
+      { 
+      name:"",
+      description:"",
+      image:"",
+      price:"",
+      stock:"", 
+      id_category:""
+      }
+    )
+  
+  const [categories,setCategories]=useState([])
+  const [furnitures,setFurnitures]=useState([])
+
+      const addFurniture=async(e)=>{
+        e.preventDefault();
+        try{
+          const response= await axios.post("http://127.0.0.1:8000/api/sales/add_furniturs",formdata)
+          console.log(response)
+        }catch(error){
+          console.log(error)
+        }
+      }
+
+   useEffect(() => {
+  axios.get("http://127.0.0.1:8000/api/sales/add_furniturs")
+    .then(res => setFurnitures(res.data))
+    .catch(err => console.log(err));
+}, []);
+console.log(furnitures)
+
+      
+     useEffect(() => {
+  axios.get("http://127.0.0.1:8000/api/sales/get_category")
+    .then(res => setCategories(res.data))
+    .catch(err => console.log(err));
+}, []);
+console.log(categories)
+
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
@@ -62,11 +104,14 @@ export default function FurnituresPage() {
             <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="chair">Chair</SelectItem>
-            <SelectItem value="table">Table</SelectItem>
-            <SelectItem value="sofa">Sofa</SelectItem>
-            <SelectItem value="bed">Bed</SelectItem>
+         <SelectContent>
+  {categories.map((category,i) => (
+    <SelectItem key={i} value={i}>
+      {category.name}
+    </SelectItem>
+  ))}
+</SelectContent>
+    
           </SelectContent>
         </Select>
       </div>
@@ -85,19 +130,20 @@ export default function FurnituresPage() {
         </TableHeader>
 
         <TableBody>
-          <TableRow>
-            <TableCell>1</TableCell>
-            <TableCell>Modern Chair</TableCell>
-            <TableCell>Chair</TableCell>
+          {furnitures?.map((furniture) => (
+          <TableRow key={furniture.id}>
+            <TableCell>{furniture.id}</TableCell>
+            <TableCell>{furniture.name}</TableCell>
+            <TableCell>{furniture.id_category}</TableCell>
             <TableCell className="max-w-xs truncate">
-              Comfortable modern wooden chair
+              {furniture.description}
             </TableCell>
             <TableCell>
               <img
                 src="https://via.placeholder.com/40"
                 className="h-10 w-10 rounded object-cover"
                 alt=""
-              />
+                />
             </TableCell>
             <TableCell className="text-right space-x-2">
               <Dialog>
@@ -123,6 +169,7 @@ export default function FurnituresPage() {
               </Button>
             </TableCell>
           </TableRow>
+          ))}
         </TableBody>
       </Table>
     </div>
@@ -141,15 +188,19 @@ function FurnitureForm() {
 
       <div>
         <Label>Category</Label>
-        <Select>
+          <Select>
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Filter by category" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="chair">Chair</SelectItem>
-            <SelectItem value="table">Table</SelectItem>
-            <SelectItem value="sofa">Sofa</SelectItem>
-            <SelectItem value="bed">Bed</SelectItem>
+         <SelectContent>
+  {categories.map((category,i) => (
+    <SelectItem key={i} value={i}>
+      {category.name}
+    </SelectItem>
+  ))}
+</SelectContent>
+    
           </SelectContent>
         </Select>
       </div>
@@ -158,10 +209,13 @@ function FurnitureForm() {
         <Label>Description</Label>
         <Textarea placeholder="Furniture description" />
       </div>
-
+<div>
+        <Label>Price</Label>
+        <Input type="number" min={0}  placeholder="Furniture price" />
+      </div>
       <div>
         <Label>Image URL</Label>
-        <Input placeholder="https://image.url" />
+        <Input type="file" placeholder="https://image.url" />
       </div>
     </div>
   )
