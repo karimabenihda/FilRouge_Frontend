@@ -102,7 +102,7 @@ function OrderCard({ order, onCancel, cancelling }) {
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden transition-all duration-300">
-      {/* Card header — always visible */}
+      {/* Card header */}
       <div
         className="flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
         onClick={() => setExpanded(!expanded)}
@@ -133,8 +133,6 @@ function OrderCard({ order, onCancel, cancelling }) {
       {/* Expandable body */}
       {expanded && (
         <div className="px-6 pb-6 space-y-5 border-t border-gray-50">
-
-          {/* Timeline */}
           <div className="pt-4">
             <Timeline status={order.status} />
           </div>
@@ -189,15 +187,17 @@ function OrderCard({ order, onCancel, cancelling }) {
 // ── Main page ──
 export default function OrderTracking() {
   const router = useRouter();
-  const [data, setData]         = useState(null);
-  const [loading, setLoading]   = useState(true);
+  const [data, setData]             = useState(null);
+  const [loading, setLoading]       = useState(true);
   const [cancelling, setCancelling] = useState(null);
-  const [error, setError]       = useState("");
+  const [error, setError]           = useState("");
 
   useEffect(() => {
-    const customer_id = localStorage.getItem("user_id");
-    if (!customer_id) { router.push("/auth/login"); return; }
-    axios.get(`http://127.0.0.1:8000/api/Sales/get_orders/${customer_id}`)
+    const userId = localStorage.getItem("user_id");
+    if (!userId) { router.push("/auth/login"); return; }
+
+    // ✅ Fixed endpoint: /api/Sales/get_orders/{userId}
+    axios.get(`http://127.0.0.1:8000/api/Sales/get_orders/${userId}`)
       .then(res => setData(res.data))
       .catch(err => {
         if (err.response?.status === 404) setData({ orders: [], total_price: 0, payment: null });
@@ -221,7 +221,6 @@ export default function OrderTracking() {
     }
   };
 
-  // Stats derived from data
   const activeOrders    = data?.orders?.filter(o => o.status !== "cancelled" && o.status !== "delivered").length ?? 0;
   const deliveredOrders = data?.orders?.filter(o => o.status === "delivered").length ?? 0;
   const totalOrders     = data?.orders?.length ?? 0;
@@ -245,7 +244,6 @@ export default function OrderTracking() {
           <h1 className="text-3xl font-bold mb-1">Your Orders</h1>
           <p className="text-gray-400 text-sm">Track and manage all your purchases</p>
 
-          {/* Quick stats */}
           {!loading && data && (
             <div className="flex gap-6 mt-6">
               {[
@@ -265,21 +263,18 @@ export default function OrderTracking() {
 
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-4 pb-20">
 
-        {/* Loading */}
         {loading && (
           <div className="flex justify-center items-center py-20 text-gray-400 gap-2">
             <Loader2 className="animate-spin" size={20} /> Loading orders...
           </div>
         )}
 
-        {/* Error */}
         {error && (
           <div className="bg-red-50 border border-red-100 text-red-600 rounded-2xl p-4 text-sm flex items-center gap-2">
             <AlertCircle size={16} /> {error}
           </div>
         )}
 
-        {/* Empty */}
         {!loading && data?.orders?.length === 0 && (
           <div className="text-center py-24 space-y-3">
             <PackageCheck size={52} className="mx-auto text-gray-200" />
@@ -302,10 +297,10 @@ export default function OrderTracking() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Total Paid",  value: `$${data.total_price.toFixed(2)}` },
-                { label: "Method",      value: data.payment.method.replace("_", " ") },
-                { label: "Card",        value: `•••• ${data.payment.card_last4 ?? "—"}` },
-                { label: "Status",      value: data.payment.status },
+                { label: "Total Paid",   value: `$${data.total_price.toFixed(2)}` },
+                { label: "Method",       value: data.payment.method.replace("_", " ") },
+                { label: "Card",         value: `•••• ${data.payment.card_last4 ?? "—"}` },
+                { label: "Status",       value: data.payment.status },
               ].map(item => (
                 <div key={item.label} className="bg-gray-50 rounded-xl p-3">
                   <p className="text-xs text-gray-400 mb-1">{item.label}</p>

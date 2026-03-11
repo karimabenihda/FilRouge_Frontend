@@ -9,10 +9,11 @@ import { useRouter } from 'next/navigation';
 
 const page = () => {
   const router = useRouter();
-  const [step, setStep]           = useState(1);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState("");
+  const [step, setStep]               = useState(1);
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState("");
   const [orderResult, setOrderResult] = useState(null);
+  const [cartItems, setCartItems]     = useState([]);
   const [cartSummary, setCartSummary] = useState({ subtotal: 0, discount: 0 });
   const [customerId, setCustomerId]   = useState(null);
 
@@ -28,16 +29,13 @@ const page = () => {
   const handleChange = (e) => {
     let { name, value } = e.target;
 
-    // Auto-format card number: groups of 4 digits, digits only, max 16
     if (name === "card_number") {
       value = value.replace(/\D/g, "").slice(0, 16);
     }
-    // Auto-format expiry MM/YY
     if (name === "expiry") {
       value = value.replace(/\D/g, "").slice(0, 4);
       if (value.length >= 3) value = value.slice(0, 2) + "/" + value.slice(2);
     }
-    // CVV digits only, max 4
     if (name === "cvv") {
       value = value.replace(/\D/g, "").slice(0, 4);
     }
@@ -54,45 +52,42 @@ const page = () => {
     if (!userId) { router.push("/auth/login"); return; }
     setCustomerId(parseInt(userId));
 
+    // ✅ Fetch cart items to display in summary
     axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`)
       .then(res => {
-        const items    = res.data;
-        const subtotal = items.reduce((a, i) => a + i.subtotal, 0);
+        const items = Array.isArray(res.data) ? res.data : res.data.orders ?? [];
+        setCartItems(items);
+        const subtotal = items.reduce((a, i) => a + (i.subtotal ?? i.totalprice ?? 0), 0);
         const discount = items.reduce((a, i) => a + (i.discount || 0), 0);
         setCartSummary({ subtotal, discount });
       })
       .catch(() => setCartSummary({ subtotal: 0, discount: 0 }));
   }, []);
 
-  // ── Step 1 validation ──
-  const validateStep1 = () => {
-    const { cardholder } = form;
-    // Step 1 only collects shipping info (no API call needed here)
-    return true;
-  };
-
-  // ── Place order ──
+  // ── Place order — sends payment info to backend ──
   const placeOrder = async () => {
     setError("");
 
-    // Basic card validation
     if (form.card_number.length !== 16) { setError("Card number must be 16 digits."); return; }
-    if (!/^\d{2}\/\d{2}$/.test(form.expiry)) { setError("Expiry must be MM/YY."); return; }
-    if (form.cvv.length < 3) { setError("CVV must be 3 or 4 digits."); return; }
-    if (!form.cardholder.trim()) { setError("Cardholder name is required."); return; }
+    if (!/^\d{2}\/\d{2}$/.test(form.expiry))  { setError("Expiry must be MM/YY."); return; }
+    if (form.cvv.length < 3)                   { setError("CVV must be 3 or 4 digits."); return; }
+    if (!form.cardholder.trim())               { setError("Cardholder name is required."); return; }
 
     try {
       setLoading(true);
+
+      // ✅ POST to create_order — this creates orders + saves payment in one call
       const res = await axios.post(
         `http://127.0.0.1:8000/api/Sales/create_order/${customerId}`,
         {
           cardholder:  form.cardholder,
-          card_number: form.card_number,
+          card_number: form.card_number,   // backend extracts last 4 digits
           expiry:      form.expiry,
           cvv:         form.cvv,
           method:      form.method,
         }
       );
+
       setOrderResult(res.data);
       setStep(3);
     } catch (err) {
@@ -243,14 +238,20 @@ const page = () => {
                       Amount paid: <span className="font-semibold text-gray-800">${orderResult?.total_price?.toFixed(2)}</span>
                     </p>
                     <p className="text-sm text-gray-600">
+                      Cardholder: <span className="font-semibold text-gray-800">{orderResult?.payment?.cardholder}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
                       Card ending in: <span className="font-semibold text-gray-800">•••• {orderResult?.payment?.card_last4}</span>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Method: <span className="font-semibold text-gray-800 capitalize">{orderResult?.payment?.method?.replace("_", " ")}</span>
                     </p>
                     <p className="text-sm text-gray-600">
                       Status: <span className="font-semibold text-green-600 capitalize">{orderResult?.payment?.status}</span>
                     </p>
                   </div>
                   <Button>
-                    <a href="/landing/orderTracking">Order Tracking</a>
+                    <a href="/landing/orderTracking">Track My Orders</a>
                   </Button>
                 </div>
               )}

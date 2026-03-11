@@ -46,12 +46,12 @@ function ClientNav() {
                 <a href="/landing/Contact">Contact</a>
 
                 <div className="relative w-full md:w-50 text-gray-600">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                    {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                     <input
                         type="text"
                         placeholder="Search furniture"
                         className="pl-10 pr-4 py-2 border bg-white rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
-                    />
+                    /> */}
                 </div>
 
                 <CartIcon />
