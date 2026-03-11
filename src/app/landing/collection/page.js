@@ -1,59 +1,209 @@
 "use client"
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, Search, ShoppingCart } from "react-feather";
+import { useRouter } from "next/navigation";
+import ClientNav from  "../../navigation/ClientNav"
 
-const products = [
-  { id: 1, name: "Nasa Elite Chair", price: 299, img: "/images/chairs/black1.png", rating: 4.5 },
-  { id: 2, name: "Serenity Seat", price: 179, img: "/images/chairs/orange1.png", rating: 4 },
-  { id: 3, name: "Lounge Chair", price: 249, img: "/images/chairs/black2.png", rating: 4.2 },
-  { id: 4, name: "Aurora Edge Chair", price: 349, img: "/images/chairs/white1.png", rating: 5 },
-  { id: 5, name: "Century Chair", price: 199, img: "/images/chairs/gray1.png", rating: 4 },
-  { id: 6, name: "Harmony Chair", price: 279, img: "/images/chairs/brown1.png", rating: 3.8 },
-  { id: 7, name: "Rustic Retreat Chair", price: 319, img: "/images/chairs/black3.png", rating: 4.1 },
-  { id: 8, name: "Zenith Chair", price: 229, img: "/images/chairs/black4.png", rating: 4.3 },
-  { id: 9, name: "Verona Delight Chair", price: 389, img: "/images/chairs/gray2.png", rating: 4.6 },
-];
 
 export default function ChairsPage() {
+  const router = useRouter();
+
   const [sort, setSort] = useState("popularity");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [cart, setCart] = useState([]);
 
-  const categories = [
-    "Accent Chairs", "Armchairs", "Dining Chairs",
-    "Office Chairs", "Lounge Chairs", "Outdoor Chairs",
-    "Bean Bag Chairs", "Convertible Chairs"
-  ];
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] = useState(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [priceRange, setPriceRange] = useState(null);
 
   const mainFilters = ["Brand", "Color", "Price"];
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => setCategoryOpen(false);
+    if (categoryOpen) document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [categoryOpen]);
+
+  const fetchData = async () => {
+    try {
+      const furnitures = await axios.get("http://localhost:8000/api/furnitures/furnitures");
+      const categoriesRes = await axios.get("http://localhost:8000/api/furnitures/categories");
+      const subcategoriesRes = await axios.get("http://localhost:8000/api/furnitures/subcategories");
+
+      setProducts(furnitures.data);
+      setCategories(categoriesRes.data);
+      setSubcategories(subcategoriesRes.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filteredProducts = products
+    .filter((product) => {
+      let categoryFilter = true;
+      let subFilter = true;
+      let priceFilter = true;
+
+      if (selectedCategory) {
+        const subIds = subcategories
+          .filter(sub => sub.category_id === selectedCategory)
+          .map(sub => sub.id);
+        categoryFilter = subIds.includes(product.subcategory_id);
+      }
+
+      if (selectedSubcategory) {
+        subFilter = product.subcategory_id === selectedSubcategory;
+      }
+
+      if (priceRange && priceRange.label !== "All") {
+        priceFilter = product.price >= priceRange.min && product.price <= priceRange.max;
+      }
+
+      return categoryFilter && subFilter && priceFilter;
+    })
+    .sort((a, b) => {
+      if (sort === "priceLow") return a.price - b.price;
+      if (sort === "priceHigh") return b.price - a.price;
+      return 0;
+    });
+
+const handleAddToCart = async (product) => {
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    router.push("/auth/login");
+    return;
+  }
+
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  localStorage.setItem("user_id", payload.user_id);
+  localStorage.setItem("user_email", payload.sub);
+  localStorage.setItem("user_role", payload.role);
+
+  const customerId = payload.user_id;
+
+  try {
+    await axios.post("http://127.0.0.1:8000/api/Sales/add", {
+      product_id: product.ProductID,
+      customer_id: customerId,
+      quantity: 1,
+      subtotal: product.price,
+      discount: 0.0
+    });
+
+    // update badge
+    setCart((prevCart) => {
+      const existing = prevCart.find(item => item.ProductID === product.ProductID);
+      if (existing) {
+        return prevCart.map(item =>
+          item.ProductID === product.ProductID
+            ? { ...item, qty: item.qty + 1 }
+            : item
+        );
+      } else {
+        return [...prevCart, { ...product, qty: 1 }];
+      }
+    });
+
+  } catch (error) {
+    console.error("Failed to add to cart:", error);
+  }
+};
+const [cartCount, setCartCount] = useState(0)
+
+    useEffect(() => {
+        const fetchCartCount = async () => {
+            const userId = localStorage.getItem("user_id")
+            if (!userId) return
+            try {
+                const res = await axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`)
+                setCartCount(res.data.length)
+            } catch {
+                setCartCount(0)
+            }
+        }
+        fetchCartCount()
+    }, [])
+    const CartIcon = () => (
+        <a href="/landing/cart" className="relative cursor-pointer">
+            <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M.583.583h2.333l1.564 7.81a1.17 1.17 0 0 0 1.166.94h5.67a1.17 1.17 0 0 0 1.167-.94l.933-4.893H3.5m2.333 8.75a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0m6.417 0a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0" stroke="#060e19" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            {cartCount > 0 && (
+                <span className="absolute -top-2 -right-3 text-xs text-white bg-[#c8ad93] w-[18px] h-[18px] rounded-full flex items-center justify-center">
+                    {cartCount > 99 ? '99+' : cartCount}
+                </span>
+            )}
+        </a>
+    )
   return (
     <div className="px-4 md:px-16">
 
       {/* Navbar */}
-      <nav className="flex flex-col py-3 md:flex-row items-center justify-between px-4 md:px-8  bg-white border-b border-gray-100 gap-4 md:gap-0">
+     <ClientNav/>
+ <nav className="flex flex-col md:flex-row py-3 items-center justify-between bg-white border-b border-gray-100 gap-4 md:gap-0 px-4 md:px-8">
         <div className="flex items-center gap-4 md:gap-8 w-full md:w-auto justify-between">
-           <button 
-            className="md:hidden cursor-pointer -ml-3 p-2 bg-gray-100 rounded-md" 
+
+          <button
+            className="md:hidden cursor-pointer -ml-3 p-2 bg-gray-100 rounded-md"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            ☰ 
+            ☰
           </button>
 
-            <button className="flex items-center gap-1 text-gray-700 hover:text-black font-medium transition-colors">
+          {/* Category Dropdown */}
+          <div className="relative" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="flex items-center gap-1 text-gray-700 hover:text-black font-medium transition-colors"
+              onClick={() => setCategoryOpen(!categoryOpen)}
+            >
               Category
               <ChevronDown size={18} />
             </button>
-            <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">
-              Most Wanted
-            </a>
-            <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">
-              What's New
-            </a>
+
+            {categoryOpen && (
+              <div className="absolute top-8 left-0 bg-white border border-gray-100 rounded-xl shadow-lg z-50 min-w-40">
+                <div
+                  onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); setCategoryOpen(false); }}
+                  className="px-4 py-2 text-sm text-gray-400 hover:text-black hover:bg-gray-50 cursor-pointer rounded-t-xl"
+                >
+                  All Categories
+                </div>
+                {categories.map((category) => (
+                  <div
+                    key={category.id}
+                    onClick={() => {
+                      setSelectedCategory(category.id);
+                      setSelectedSubcategory(null);
+                      setCategoryOpen(false);
+                    }}
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-50 cursor-pointer last:rounded-b-xl"
+                  >
+                    {category.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">Most Wanted</a>
+          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">What's New</a>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-6">
-          <div className="relative w-full  md:w-50">
+        <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
+          <div className="relative w-full md:w-50">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
@@ -61,18 +211,22 @@ export default function ChairsPage() {
               className="pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
             />
           </div>
-          <a href='/landing/cart' className="text-gray-700 hover:text-black transition-colors">
-            <ShoppingCart size={22} />
-          </a>
+                          {/* <CartIcon /> */}
+
+      <a href='/landing/cart' className="text-gray-700 hover:text-black transition-colors relative"> 
+  <ShoppingCart size={24} />
+  {cart.length > 0 && (
+    <span className="absolute -top-2 -right-2 bg-[#c8ad93] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium">
+      {cart.reduce((total, item) => total + item.qty, 0)}
+    </span>
+  )}
+</a> 
           <Button>
-            <a href="/auth/login">
-            Login
-            </a>
-            </Button>
+            <a href="/auth/login">Login</a>
+          </Button>
         </div>
       </nav>
-
-      {/* Hero Image */}
+      {/* Hero */}
       <div className="relative w-full mb-5 mx-auto overflow-hidden rounded-2xl">
         <img
           src="/images/bg/retro.jpg"
@@ -105,50 +259,96 @@ export default function ChairsPage() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex flex-col md:flex-row gap-6">
 
-        {/* Sidebar for Desktop */}
+        {/* Sidebar desktop */}
         <div className="hidden md:block w-64 bg-white p-4 font-sans">
-          <SidebarContent categories={categories} mainFilters={mainFilters} />
+          <SidebarContent
+            categories={categories}
+            subcategories={subcategories}
+            mainFilters={mainFilters}
+            setSelectedSubcategory={setSelectedSubcategory}
+            setSelectedCategory={setSelectedCategory}
+            setPriceRange={setPriceRange}
+          />
         </div>
 
-        {/* Sidebar Drawer for Mobile */}
+        {/* Sidebar mobile */}
         {sidebarOpen && (
           <div className="fixed inset-0 z-50 bg-black/30 flex">
-            <div className="w-64 bg-white p-4 font-sans h-full">
-              <button className="mb-4 text-gray-600" onClick={() => setSidebarOpen(false)}>
+            <div className="w-64 bg-white p-4 font-sans min-h-screen overflow-y-auto">
+              <button
+                className="mb-4 text-gray-600"
+                onClick={() => setSidebarOpen(false)}
+              >
                 Close ✕
               </button>
-              <SidebarContent categories={categories} mainFilters={mainFilters} />
+              <SidebarContent
+                categories={categories}
+                subcategories={subcategories}
+                mainFilters={mainFilters}
+                setSelectedSubcategory={setSelectedSubcategory}
+                setSelectedCategory={setSelectedCategory}
+                setPriceRange={setPriceRange}
+              />
             </div>
             <div className="flex-1" onClick={() => setSidebarOpen(false)}></div>
           </div>
         )}
 
-        {/* Products Grid */}
+        {/* Products */}
         <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-          {products.map((product) => (
-            <div key={product.id} className="border rounded-xl p-4 flex flex-col items-center bg-white shadow-sm hover:shadow-md transition">
-              <img src={product.img} alt={product.name} className="h-40 w-full object-cover rounded-lg mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-1">{product.name}</h3>
-              <p className="text-gray-600 mb-2">${product.price}</p>
-              <div className="flex items-center gap-1 mb-4">
-                {Array.from({ length: 5 }, (_, i) => (
-                  <span key={i} className={`text-yellow-400 ${i < Math.floor(product.rating) ? "opacity-100" : "opacity-30"}`}>★</span>
-                ))}
+          {filteredProducts.length > 0 ? (
+            filteredProducts.map((product) => (
+              <div
+                key={product.ProductID}
+                className="border rounded-xl p-4 flex flex-col items-center bg-white shadow-sm hover:shadow-md transition w-full self-start"
+              >
+                <img
+                  src={product.image}
+                  alt={product.ProductName}
+                  className="h-40 w-full object-cover rounded-lg mb-4"
+                />
+                <h3 className="text-lg font-medium text-gray-900 mb-1 text-center">{product.ProductName}</h3>
+                <p className="text-gray-600 mb-2">${product.price}</p>
+                <div className="flex items-center gap-1 mb-4">
+                  {Array.from({ length: 5 }, (_, i) => (
+                    <span key={i} className="text-yellow-400">★</span>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => handleAddToCart(product)}
+                  className="w-full bg-[#c8ad93] text-white hover:bg-[#e3c6a0]"
+                >
+                  Add to Cart
+                </Button>
               </div>
-              <Button className="w-full bg-[#c8ad93] text-white hover:bg-[#e3c6a0]">Add to Cart</Button>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-center col-span-full text-gray-500">No products found for selected filters</p>
+          )}
         </div>
+
       </div>
     </div>
   );
 }
 
-// Sidebar content as a component to reuse for mobile & desktop
-function SidebarContent({ categories, mainFilters }) {
+function SidebarContent({ categories, subcategories, mainFilters, setSelectedSubcategory, setSelectedCategory, setPriceRange }) {
+
+  const [openCategory, setOpenCategory] = useState(null);
+
+  const priceRanges = [
+    { label: "All", min: 0, max: Infinity },
+    { label: "Under $100", min: 0, max: 100 },
+    { label: "$100 - $300", min: 100, max: 300 },
+    { label: "$300 - $600", min: 300, max: 600 },
+    { label: "Above $600", min: 600, max: Infinity }
+  ];
+
+  const toggleCategory = (id) => setOpenCategory(openCategory === id ? null : id);
+
   return (
     <>
       <div className="flex items-center justify-between bg-[#F3F5F7] p-3 rounded-lg mb-4 cursor-pointer">
@@ -157,24 +357,60 @@ function SidebarContent({ categories, mainFilters }) {
       </div>
 
       <div className="space-y-1 ml-2 mb-8">
-        {categories.map((item) => (
-          <div
-            key={item}
-            className="flex items-center justify-between py-2 px-2 hover:bg-gray-50 rounded-md cursor-pointer group"
-          >
-            <span className="text-gray-600 text-sm group-hover:text-black transition-colors">{item}</span>
-            <ChevronDown size={14} className="text-gray-400" />
+        {categories.map((category) => (
+          <div key={category.id}>
+            <div
+              onClick={() => {
+                toggleCategory(category.id);
+                setSelectedCategory(category.id);
+                setSelectedSubcategory(null);
+              }}
+              className="flex items-center justify-between py-2 px-2 hover:bg-gray-50 rounded-md cursor-pointer group"
+            >
+              <span className="text-gray-600 text-sm group-hover:text-black transition-colors">{category.name}</span>
+              {openCategory === category.id ? (
+                <ChevronDown size={14} className="text-gray-400" />
+              ) : (
+                <ChevronRight size={14} className="text-gray-400" />
+              )}
+            </div>
+
+            {openCategory === category.id && (
+              <div className="ml-4 space-y-1">
+                {subcategories.filter(sub => sub.category_id === category.id).map(sub => (
+                  <div
+                    key={sub.id}
+                    onClick={() => setSelectedSubcategory(sub.id)}
+                    className="py-1 px-2 text-sm text-gray-500 hover:text-black cursor-pointer"
+                  >
+                    {sub.name}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         ))}
       </div>
 
       <div className="border-t border-gray-100 pt-4 space-y-4">
-        {mainFilters.map((filter) => (
+        {mainFilters.map(filter => (
           <div key={filter} className="flex items-center justify-between py-2 px-2 cursor-pointer">
             <span className="text-gray-800 font-medium">{filter}</span>
             <ChevronDown size={18} className="text-gray-600" />
           </div>
         ))}
+
+        <div className="mt-2 space-y-2">
+          {priceRanges.map(range => (
+            <div
+              key={range.label}
+              onClick={() => setPriceRange(range)}
+              className="text-sm text-gray-600 hover:text-black cursor-pointer px-2"
+            >
+              {range.label}
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

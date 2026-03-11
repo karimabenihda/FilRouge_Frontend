@@ -17,7 +17,7 @@ export default function ClientRootLayout({ children }) {
 
   return (
     <>
-      {loading && <Spinner />}
+      {/* {loading && <Spinner />} */}
        <div
         className={`transition-all duration-700 ease-out 
           ${showContent ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-6"}`}

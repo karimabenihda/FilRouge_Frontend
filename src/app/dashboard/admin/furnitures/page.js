@@ -9,9 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
+import FurnitureForm from "./FurnitureForm"
 import {
   Select,
   SelectContent,
@@ -30,45 +28,72 @@ import { Plus, Pencil, Trash2 } from "lucide-react"
 import axios from "axios"
 import { useState ,useEffect} from "react"
 
-export default function FurnituresPage() {
-  const [formdata,setFormdata]=useState(
-      { 
-      name:"",
-      description:"",
-      image:"",
-      price:"",
-      stock:"", 
-      id_category:""
-      }
-    )
+export default function page() {
+    const [formdata, setFormdata] = useState({ name:"", description:"", image:"", price:"", stock:"", id_category:"" })
+  const [categories, setCategories] = useState([])
+  const [furnitures, setFurnitures] = useState([])
+  const [selectedFurniture, setSelectedFurniture] = useState(null)
+
   
-  const [categories,setCategories]=useState([])
-  const [furnitures,setFurnitures]=useState([])
+ useEffect(() => {
+    axios.get("http://127.0.0.1:8000/api/sales/get_categories")
+      .then(res => setCategories(res.data))
+      .catch(console.log)
+  }, [])
 
-      const addFurniture=async(e)=>{
-        e.preventDefault();
-        try{
-          const response= await axios.post("http://127.0.0.1:8000/api/sales/add_furniturs",formdata)
-          console.log(response)
-        }catch(error){
-          console.log(error)
-        }
-      }
+  // Fetch furnitures
+  const fetchFurnitures = () => {
+    axios.get("http://127.0.0.1:8000/api/sales/get_furnitures")
+      .then(res => setFurnitures(res.data))
+      .catch(console.log)
+  }
 
-   useEffect(() => {
-  axios.get("http://127.0.0.1:8000/api/sales/add_furniturs")
-    .then(res => setFurnitures(res.data))
-    .catch(err => console.log(err));
-}, []);
-console.log(furnitures)
+  useEffect(() => {
+    fetchFurnitures()
+  }, [])
 
-      
-     useEffect(() => {
-  axios.get("http://127.0.0.1:8000/api/sales/get_category")
-    .then(res => setCategories(res.data))
-    .catch(err => console.log(err));
-}, []);
-console.log(categories)
+  // Add furniture
+  const addFurniture = async () => {
+    try {
+      await axios.post("http://127.0.0.1:8000/api/sales/add_furniturs", {
+        ...formdata,
+        price: Number(formdata.price),
+        stock: Number(formdata.stock),
+        id_category: Number(formdata.id_category)
+      })
+      fetchFurnitures()
+      setFormdata({ name:"", description:"", image:"", price:"", stock:"", id_category:"" })
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  // Delete furniture
+  const deleteFurniture = async (id) => {
+    if(!confirm("Are you sure?")) return
+    try{
+      await axios.delete(`http://127.0.0.1:8000/api/sales/delete_furniture/${id}`)
+      setFurnitures(prev => prev.filter(f => f.id !== id))
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  // Update furniture
+  const updateFurniture = async () => {
+    try{
+      await axios.put(`http://127.0.0.1:8000/api/sales/update_furniture/${selectedFurniture.id}`, {
+        ...selectedFurniture,
+        price: Number(selectedFurniture.price),
+        stock: Number(selectedFurniture.stock),
+        id_category: Number(selectedFurniture.id_category)
+      })
+      fetchFurnitures()
+      setSelectedFurniture(null)
+    } catch(err) {
+      console.log(err)
+    }
+  }
 
 
   return (
@@ -90,9 +115,9 @@ console.log(categories)
               <DialogTitle>Add Furniture</DialogTitle>
             </DialogHeader>
 
-            <FurnitureForm />
+            <FurnitureForm data={formdata} setData={setFormdata} categories={categories}/>
 
-            <Button>Save</Button>
+            <Button onClick={addFurniture}>Save</Button>
           </DialogContent>
         </Dialog>
       </div>
@@ -178,45 +203,45 @@ console.log(categories)
 
 /* ---------- FORM UI ---------- */
 
-function FurnitureForm() {
-  return (
-    <div className="space-y-4">
-      <div>
-        <Label>Name</Label>
-        <Input placeholder="Furniture name" />
-      </div>
+// function FurnitureForm() {
+//   return (
+//     <div className="space-y-4">
+//       <div>
+//         <Label>Name</Label>
+//         <Input placeholder="Furniture name" />
+//       </div>
 
-      <div>
-        <Label>Category</Label>
-          <Select>
-          <SelectTrigger>
-            <SelectValue placeholder="Filter by category" />
-          </SelectTrigger>
-          <SelectContent>
-         <SelectContent>
-  {categories.map((category,i) => (
-    <SelectItem key={i} value={i}>
-      {category.name}
-    </SelectItem>
-  ))}
-</SelectContent>
+//       <div>
+//         <Label>Category</Label>
+//           <Select>
+//           <SelectTrigger>
+//             <SelectValue placeholder="Filter by category" />
+//           </SelectTrigger>
+//           <SelectContent>
+//          <SelectContent>
+//   {categories.map((category,i) => (
+//     <SelectItem key={i} value={i}>
+//       {category.name}
+//     </SelectItem>
+//   ))}
+// </SelectContent>
     
-          </SelectContent>
-        </Select>
-      </div>
+//           </SelectContent>
+//         </Select>
+//       </div>
 
-      <div>
-        <Label>Description</Label>
-        <Textarea placeholder="Furniture description" />
-      </div>
-<div>
-        <Label>Price</Label>
-        <Input type="number" min={0}  placeholder="Furniture price" />
-      </div>
-      <div>
-        <Label>Image URL</Label>
-        <Input type="file" placeholder="https://image.url" />
-      </div>
-    </div>
-  )
-}
+//       <div>
+//         <Label>Description</Label>
+//         <Textarea placeholder="Furniture description" />
+//       </div>
+// <div>
+//         <Label>Price</Label>
+//         <Input type="number" min={0}  placeholder="Furniture price" />
+//       </div>
+//       <div>
+//         <Label>Image URL</Label>
+//         <Input type="file" placeholder="https://image.url" />
+//       </div>
+//     </div>
+//   )
+// }
