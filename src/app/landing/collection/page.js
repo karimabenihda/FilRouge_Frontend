@@ -14,6 +14,8 @@ export default function ChairsPage() {
   const [sort, setSort] = useState("popularity");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [cart, setCart] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeNavFilter, setActiveNavFilter] = useState(null); // "mostWanted" | "whatsNew" | null
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -50,8 +52,27 @@ export default function ChairsPage() {
     }
   };
 
+  // Handle nav filter toggle — clicking the active one deselects it
+  const handleNavFilter = (filter) => {
+    setActiveNavFilter((prev) => (prev === filter ? null : filter));
+    // Reset category/subcategory filters when switching nav filters
+    setSelectedCategory(null);
+    setSelectedSubcategory(null);
+    setPriceRange(null);
+    setSearchQuery("");
+  };
+
   const filteredProducts = products
     .filter((product) => {
+      // Search filter
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const nameMatch = product.ProductName?.toLowerCase().includes(query);
+        const descMatch = product.description?.toLowerCase().includes(query);
+        if (!nameMatch && !descMatch) return false;
+      }
+
+      // Category filter
       let categoryFilter = true;
       let subFilter = true;
       let priceFilter = true;
@@ -74,10 +95,34 @@ export default function ChairsPage() {
       return categoryFilter && subFilter && priceFilter;
     })
     .sort((a, b) => {
+      // "Most Wanted": sort by sold_count, then rating, then fallback to 0
+      if (activeNavFilter === "mostWanted") {
+        const soldA = a.sold_count ?? a.soldCount ?? 0;
+        const soldB = b.sold_count ?? b.soldCount ?? 0;
+        if (soldB !== soldA) return soldB - soldA;
+        return (b.rating ?? 0) - (a.rating ?? 0);
+      }
+
+      // "What's New": sort by created_at descending (newest first)
+      if (activeNavFilter === "whatsNew") {
+        const dateA = a.created_at ? new Date(a.created_at) : new Date(0);
+        const dateB = b.created_at ? new Date(b.created_at) : new Date(0);
+        return dateB - dateA;
+      }
+
+      // Default sort dropdown
       if (sort === "priceLow") return a.price - b.price;
       if (sort === "priceHigh") return b.price - a.price;
       return 0;
     });
+
+  // "Most Wanted" slice: show top 12 best sellers when filter is active
+  const displayedProducts =
+    activeNavFilter === "mostWanted"
+      ? filteredProducts.slice(0, 12)
+      : activeNavFilter === "whatsNew"
+      ? filteredProducts.slice(0, 12)
+      : filteredProducts;
 
 const handleAddToCart = async (product) => {
   const token = localStorage.getItem("token");
@@ -198,8 +243,31 @@ const [cartCount, setCartCount] = useState(0)
             )}
           </div>
 
-          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">Most Wanted</a>
-          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">What's New</a>
+          {/* Most Wanted — toggles active filter */}
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); handleNavFilter("mostWanted"); }}
+            className={`font-medium transition-colors ${
+              activeNavFilter === "mostWanted"
+                ? "text-[#c8ad93] underline underline-offset-4"
+                : "text-gray-700 hover:text-black"
+            }`}
+          >
+            Most Wanted
+          </a>
+
+          {/* What's New — toggles active filter */}
+          <a
+            href="#"
+            onClick={(e) => { e.preventDefault(); handleNavFilter("whatsNew"); }}
+            className={`font-medium transition-colors ${
+              activeNavFilter === "whatsNew"
+                ? "text-[#c8ad93] underline underline-offset-4"
+                : "text-gray-700 hover:text-black"
+            }`}
+          >
+            What's New
+          </a>
         </div>
 
         <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
@@ -208,6 +276,12 @@ const [cartCount, setCartCount] = useState(0)
             <input
               type="text"
               placeholder="Search furniture"
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                // Clear nav filters when user starts searching
+                if (e.target.value.trim()) setActiveNavFilter(null);
+              }}
               className="pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
             />
           </div>
@@ -241,6 +315,21 @@ const [cartCount, setCartCount] = useState(0)
           </div>
         </div>
       </div>
+
+      {/* Active filter label */}
+      {(activeNavFilter || searchQuery.trim()) && (
+        <div className="flex items-center gap-2 mb-4 text-sm text-gray-500">
+          {activeNavFilter === "mostWanted" && <span>Showing: <strong>Most Wanted</strong> products</span>}
+          {activeNavFilter === "whatsNew" && <span>Showing: <strong>What's New</strong> products</span>}
+          {searchQuery.trim() && <span>Showing results for: <strong>"{searchQuery}"</strong></span>}
+          <button
+            onClick={() => { setActiveNavFilter(null); setSearchQuery(""); }}
+            className="ml-2 text-[#c8ad93] hover:underline"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Sort */}
       <div className="flex flex-col md:flex-row justify-end items-center mb-8 gap-4 md:gap-2">
@@ -299,8 +388,8 @@ const [cartCount, setCartCount] = useState(0)
 
         {/* Products */}
         <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 flex-1">
-          {filteredProducts.length > 0 ? (
-            filteredProducts.map((product) => (
+          {displayedProducts.length > 0 ? (
+            displayedProducts.map((product) => (
               <div
                 key={product.ProductID}
                 className="border rounded-xl p-4 flex flex-col items-center bg-white shadow-sm hover:shadow-md transition w-full self-start"
