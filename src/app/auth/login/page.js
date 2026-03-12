@@ -14,9 +14,11 @@ const Page = () => {
     email: "",
     password: ""
   });
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
     try {
       const response = await axios.post(
         'http://127.0.0.1:8000/api/auth/login',
@@ -30,21 +32,21 @@ const Page = () => {
       localStorage.setItem("user_id", payload.user_id);
       localStorage.setItem("user_email", payload.sub);
       localStorage.setItem("user_role", payload.role);
-
+      localStorage.setItem("user_firstname", payload.firstname);
+      localStorage.setItem("user_lastname", payload.lastname);
       
       if (response.status === 200) {
         if (payload.role === "admin") {
           router.push('/dashboard');
-        } if (payload.role === "client"){
-          router.push('/landing/collection'); // redirect regular clients to landing page
-        }
-        else{
-          console.log('nothing')
+        } else if (payload.role === "client"){
+          router.push('/landing/collection'); 
+        } else {
+          console.log('Unknown role:', payload.role);
         }
       }
-
     } catch (error) {
-      console.log('Login error:', error);
+      console.error('Login error details:', error.response?.data || error.message);
+      setErrorMsg(error.response?.data?.detail || "Invalid email or password. Please try again.");
     }
   };
 
@@ -68,6 +70,12 @@ const Page = () => {
           <p className="text-sm mt-4 text-[#1e3753]">
             If you are already a member, easily log in now.
           </p>
+
+          {errorMsg && (
+            <div className="mt-4 p-3 bg-red-100 border border-red-200 text-red-700 text-xs rounded-lg">
+              {errorMsg}
+            </div>
+          )}
 
           <form onSubmit={handleLogin} className="flex flex-col gap-4 pt-7">
             <Input

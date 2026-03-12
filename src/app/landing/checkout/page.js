@@ -16,6 +16,16 @@ const page = () => {
   const [cartItems, setCartItems]     = useState([]);
   const [cartSummary, setCartSummary] = useState({ subtotal: 0, discount: 0 });
   const [customerId, setCustomerId]   = useState(null);
+  const [userInfo, setUserInfo] = useState({
+    firstname: "",
+    lastname: "",
+    email: ""
+  });
+
+  const getHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   // ── Payment form state ──
   const [form, setForm] = useState({
@@ -52,8 +62,15 @@ const page = () => {
     if (!userId) { router.push("/auth/login"); return; }
     setCustomerId(parseInt(userId));
 
+    // ✅ Load user info from localStorage
+    setUserInfo({
+      firstname: localStorage.getItem("user_firstname") || "",
+      lastname: localStorage.getItem("user_lastname") || "",
+      email: localStorage.getItem("user_email") || ""
+    });
+
     // ✅ Fetch cart items to display in summary
-    axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`)
+    axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`, { headers: getHeaders() })
       .then(res => {
         const items = Array.isArray(res.data) ? res.data : res.data.orders ?? [];
         setCartItems(items);
@@ -85,7 +102,8 @@ const page = () => {
           expiry:      form.expiry,
           cvv:         form.cvv,
           method:      form.method,
-        }
+        },
+        { headers: getHeaders() }
       );
 
       setOrderResult(res.data);
@@ -150,9 +168,25 @@ const page = () => {
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
                   <h2 className="text-2xl font-bold text-gray-800">User Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input type="text" placeholder="First Name" />
-                    <Input type="text" placeholder="Last Name" />
-                    <Input type="email" placeholder="Email Address" className="md:col-span-2" />
+                    <Input
+                      type="text"
+                      placeholder="First Name"
+                      value={userInfo.firstname}
+                      onChange={(e) => setUserInfo({ ...userInfo, firstname: e.target.value })}
+                    />
+                    <Input
+                      type="text"
+                      placeholder="Last Name"
+                      value={userInfo.lastname}
+                      onChange={(e) => setUserInfo({ ...userInfo, lastname: e.target.value })}
+                    />
+                    <Input
+                      type="email"
+                      placeholder="Email Address"
+                      className="md:col-span-2"
+                      value={userInfo.email}
+                      onChange={(e) => setUserInfo({ ...userInfo, email: e.target.value })}
+                    />
                     <Input type="text" placeholder="Shipping Address" className="md:col-span-2" />
                   </div>
                 </div>

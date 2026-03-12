@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import ClientNav from '@/app/navigation/ClientNav';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import ChevronDown  from 'lucide-react'
 
 const page = () => {
   const router = useRouter();
@@ -14,6 +13,11 @@ const page = () => {
   const [loading, setLoading] = useState(true);
   const [coupon, setCoupon] = useState("");
   const [customerId, setCustomerId] = useState(null);
+
+  const getHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   const itemsCount = items.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = items.reduce((acc, item) => acc + item.subtotal, 0);
@@ -41,7 +45,7 @@ const page = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://127.0.0.1:8000/api/Sales/${customerId}`);
+      const res = await axios.get(`http://127.0.0.1:8000/api/Sales/${customerId}`, { headers: getHeaders() });
       setItems(res.data);
     } catch (error) {
       if (error.response?.status === 404) {
@@ -59,7 +63,6 @@ const page = () => {
     const newQty = item.quantity + delta;
     if (newQty < 1) return;
 
-    // Compute unit price from current subtotal/quantity
     const unitPrice = item.product?.price ?? (item.subtotal / item.quantity);
 
     try {
@@ -67,7 +70,8 @@ const page = () => {
         quantity: newQty,
         subtotal: 0,        // backend recalculates
         discount: item.discount
-      });
+      }, { headers: getHeaders() });
+
       setItems(prev =>
         prev.map(i =>
           i.id === item.id
@@ -75,6 +79,7 @@ const page = () => {
             : i
         )
       );
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.error("Failed to update quantity:", error);
     }
@@ -83,8 +88,9 @@ const page = () => {
   // ──────────────── REMOVE ITEM ────────────────
   const removeItem = async (cartItemId) => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/Sales/remove/${cartItemId}`);
+      await axios.delete(`http://127.0.0.1:8000/api/Sales/remove/${cartItemId}`, { headers: getHeaders() });
       setItems(prev => prev.filter(i => i.id !== cartItemId));
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.error("Failed to remove item:", error);
     }
@@ -93,8 +99,9 @@ const page = () => {
   // ──────────────── CLEAR CART ────────────────
   const clearCart = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/api/Sales/clear/${customerId}`);
+      await axios.delete(`http://127.0.0.1:8000/api/Sales/clear/${customerId}`, { headers: getHeaders() });
       setItems([]);
+      window.dispatchEvent(new Event("cartUpdated"));
     } catch (error) {
       console.error("Failed to clear cart:", error);
     }

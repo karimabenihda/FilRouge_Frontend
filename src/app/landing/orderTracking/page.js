@@ -192,12 +192,16 @@ export default function OrderTracking() {
   const [cancelling, setCancelling] = useState(null);
   const [error, setError]           = useState("");
 
+  const getHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   useEffect(() => {
     const userId = localStorage.getItem("user_id");
     if (!userId) { router.push("/auth/login"); return; }
 
-    // ✅ Fixed endpoint: /api/Sales/get_orders/{userId}
-    axios.get(`http://127.0.0.1:8000/api/Sales/get_orders/${userId}`)
+    axios.get(`http://127.0.0.1:8000/api/Sales/get_orders/${userId}`, { headers: getHeaders() })
       .then(res => setData(res.data))
       .catch(err => {
         if (err.response?.status === 404) setData({ orders: [], total_price: 0, payment: null });
@@ -209,7 +213,7 @@ export default function OrderTracking() {
   const cancelOrder = async (orderId) => {
     setCancelling(orderId);
     try {
-      await axios.put(`http://127.0.0.1:8000/api/Sales/${orderId}/cancel`);
+      await axios.put(`http://127.0.0.1:8000/api/Sales/${orderId}/cancel`, {}, { headers: getHeaders() });
       setData(prev => ({
         ...prev,
         orders: prev.orders.map(o => o.id === orderId ? { ...o, status: "cancelled" } : o),

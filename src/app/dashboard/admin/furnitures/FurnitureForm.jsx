@@ -4,33 +4,32 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-// import { useState ,useEffect} from "react"
 
-export default function FurnitureForm({ data, setData, categories }) {
-    
-
-
+export default function FurnitureForm({ data, setData, subcategories }) {
   return (
     <div className="space-y-4">
       <div>
-        <Label>Name</Label>
+        <Label>Product Name</Label>
         <Input
           placeholder="Furniture name"
-          value={data.name}
-          onChange={e => setData({ ...data, name: e.target.value })}
+          value={data.ProductName || ""}
+          onChange={e => setData({ ...data, ProductName: e.target.value })}
         />
       </div>
 
       <div>
-        <Label>Category</Label>
-        <Select value={String(data.id_category)} onValueChange={v => setData({ ...data, id_category: v })}>
+        <Label>Subcategory</Label>
+        <Select 
+          value={data.subcategory_id ? String(data.subcategory_id) : ""} 
+          onValueChange={v => setData({ ...data, subcategory_id: v })}
+        >
           <SelectTrigger>
-            <SelectValue placeholder="Select category" />
+            <SelectValue placeholder="Select subcategory" />
           </SelectTrigger>
           <SelectContent>
-            {categories?.map((category, i) => (
-              <SelectItem key={i} value={String(category.id)}>
-                {category.name}
+            {subcategories?.map((sub) => (
+              <SelectItem key={sub.id} value={String(sub.id)}>
+                {sub.name} ({sub.category?.name})
               </SelectItem>
             ))}
           </SelectContent>
@@ -41,31 +40,33 @@ export default function FurnitureForm({ data, setData, categories }) {
         <Label>Description</Label>
         <Textarea
           placeholder="Furniture description"
-          value={data.description}
+          value={data.description || ""}
           onChange={e => setData({ ...data, description: e.target.value })}
         />
       </div>
 
-      <div>
-        <Label>Price</Label>
-        <Input
-          type="number"
-          min={0}
-          placeholder="Furniture price"
-          value={data.price}
-          onChange={e => setData({ ...data, price: e.target.value })}
-        />
-      </div>
-
-      <div>
-        <Label>Stock</Label>
-        <Input
-          type="number"
-          min={0}
-          placeholder="Stock"
-          value={data.stock}
-          onChange={e => setData({ ...data, stock: e.target.value })}
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Price</Label>
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            placeholder="0.00"
+            value={data.price || ""}
+            onChange={e => setData({ ...data, price: e.target.value })}
+          />
+        </div>
+        <div>
+          <Label>Stock</Label>
+          <Input
+            type="number"
+            min={0}
+            placeholder="0"
+            value={data.stock || ""}
+            onChange={e => setData({ ...data, stock: e.target.value })}
+          />
+        </div>
       </div>
 
       <div>
@@ -73,7 +74,7 @@ export default function FurnitureForm({ data, setData, categories }) {
         <Input
           type="text"
           placeholder="https://image.url"
-          value={data.image}
+          value={data.image || ""}
           onChange={e => setData({ ...data, image: e.target.value })}
         />
       </div>

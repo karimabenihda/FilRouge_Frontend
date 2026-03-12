@@ -25,6 +25,8 @@ export const metadata = {
   },
 };
 
+import { Toaster } from "@/components/ui/sonner";
+
 export default function Layout({ children }) {
  
   return (
@@ -32,6 +34,7 @@ export default function Layout({ children }) {
       <body className={`${bodoni.variable} ${dmSans.variable}  `}>
                  <ChatbotWrapper />
          <ClientRootLayout>{children}</ClientRootLayout>
+         <Toaster />
       </body>
     </html>
   );

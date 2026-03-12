@@ -26,27 +26,29 @@ export default function ChairsPage() {
   const [selectedSubcategory, setSelectedSubcategory] = useState(null);
   const [priceRange, setPriceRange] = useState(null);
 
+  const getHeaders = () => {
+    const token = localStorage.getItem("token");
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
+
   const mainFilters = ["Brand", "Color", "Price"];
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    const handleClickOutside = () => setCategoryOpen(false);
-    if (categoryOpen) document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [categoryOpen]);
-
   const fetchData = async () => {
+    const headers = getHeaders();
     try {
-      const furnitures = await axios.get("http://localhost:8000/api/furnitures/furnitures");
-      const categoriesRes = await axios.get("http://localhost:8000/api/furnitures/categories");
-      const subcategoriesRes = await axios.get("http://localhost:8000/api/furnitures/subcategories");
+      const [furnRes, catRes, subRes] = await Promise.all([
+        axios.get("http://127.0.0.1:8000/api/furnitures/furnitures", { headers }),
+        axios.get("http://127.0.0.1:8000/api/furnitures/categories", { headers }),
+        axios.get("http://127.0.0.1:8000/api/furnitures/subcategories", { headers })
+      ]);
 
-      setProducts(furnitures.data);
-      setCategories(categoriesRes.data);
-      setSubcategories(subcategoriesRes.data);
+      setProducts(furnRes.data);
+      setCategories(catRes.data);
+      setSubcategories(subRes.data);
     } catch (error) {
       console.log(error);
     }
@@ -146,7 +148,10 @@ const handleAddToCart = async (product) => {
       quantity: 1,
       subtotal: product.price,
       discount: 0.0
-    });
+    }, { headers: getHeaders() });
+
+    // Notify navigation bar to update counts
+    window.dispatchEvent(new Event("cartUpdated"));
 
     // update badge
     setCart((prevCart) => {
@@ -166,21 +171,7 @@ const handleAddToCart = async (product) => {
     console.error("Failed to add to cart:", error);
   }
 };
-const [cartCount, setCartCount] = useState(0)
-
-    useEffect(() => {
-        const fetchCartCount = async () => {
-            const userId = localStorage.getItem("user_id")
-            if (!userId) return
-            try {
-                const res = await axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`)
-                setCartCount(res.data.length)
-            } catch {
-                setCartCount(0)
-            }
-        }
-        fetchCartCount()
-    }, [])
+    // Redundant cart count logic removed as ClientNav handles it
     const CartIcon = () => (
         <a href="/landing/cart" className="relative cursor-pointer">
             <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -285,19 +276,7 @@ const [cartCount, setCartCount] = useState(0)
               className="pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
             />
           </div>
-                          {/* <CartIcon /> */}
-
-      <a href='/landing/cart' className="text-gray-700 hover:text-black transition-colors relative"> 
-  <ShoppingCart size={24} />
-  {cart.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-[#c8ad93] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium">
-      {cart.reduce((total, item) => total + item.qty, 0)}
-    </span>
-  )}
-</a> 
-          <Button>
-            <a href="/auth/login">Login</a>
-          </Button>
+  
         </div>
       </nav>
       {/* Hero */}
