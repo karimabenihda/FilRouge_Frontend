@@ -23,7 +23,7 @@ function ClientNav() {
         try {
             // Fetch Cart Count
             try {
-                const cartRes = await axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`, { headers })
+                const cartRes = await axios.get(`http://127.0.0.1:8000/api/sales/${userId}`, { headers })
                 setCartCount(cartRes.data.length || 0)
             } catch (err) {
                 if (err.response?.status === 404) setCartCount(0)
@@ -32,7 +32,7 @@ function ClientNav() {
 
             // Fetch Order Count
             try {
-                const orderRes = await axios.get(`http://127.0.0.1:8000/api/Sales/get_orders/${userId}`, { headers })
+                const orderRes = await axios.get(`http://127.0.0.1:8000/api/sales/get_orders/${userId}`, { headers })
                 setOrderCount(orderRes.data.orders?.length || 0)
             } catch (err) {
                 if (err.response?.status === 404) setOrderCount(0)

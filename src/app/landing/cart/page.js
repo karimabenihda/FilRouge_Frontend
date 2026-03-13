@@ -45,7 +45,7 @@ const page = () => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`http://127.0.0.1:8000/api/Sales/${customerId}`, { headers: getHeaders() });
+      const res = await axios.get(`http://127.0.0.1:8000/api/sales/${customerId}`, { headers: getHeaders() });
       setItems(res.data);
     } catch (error) {
       if (error.response?.status === 404) {
@@ -110,79 +110,7 @@ const page = () => {
   return (
     <div>
       <ClientNav />
- {/* <nav className="flex flex-col md:flex-row py-3 items-center justify-between bg-white border-b border-gray-100 gap-4 md:gap-0 px-4 md:px-8">
-        <div className="flex items-center gap-4 md:gap-8 w-full md:w-auto justify-between">
-
-          <button
-            className="md:hidden cursor-pointer -ml-3 p-2 bg-gray-100 rounded-md"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            ☰
-          </button>
-
-     
-          <div className="relative" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="flex items-center gap-1 text-gray-700 hover:text-black font-medium transition-colors"
-              onClick={() => setCategoryOpen(!categoryOpen)}
-            >
-              Category
-              <ChevronDown size={18} />
-            </button>
-
-            {categoryOpen && (
-              <div className="absolute top-8 left-0 bg-white border border-gray-100 rounded-xl shadow-lg z-50 min-w-40">
-                <div
-                  onClick={() => { setSelectedCategory(null); setSelectedSubcategory(null); setCategoryOpen(false); }}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-black hover:bg-gray-50 cursor-pointer rounded-t-xl"
-                >
-                  All Categories
-                </div>
-                {categories.map((category) => (
-                  <div
-                    key={category.id}
-                    onClick={() => {
-                      setSelectedCategory(category.id);
-                      setSelectedSubcategory(null);
-                      setCategoryOpen(false);
-                    }}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-black hover:bg-gray-50 cursor-pointer last:rounded-b-xl"
-                  >
-                    {category.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">Most Wanted</a>
-          <a href="#" className="text-gray-700 hover:text-black font-medium transition-colors">What's New</a>
-        </div>
-
-        <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
-          <div className="relative w-full md:w-50">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              type="text"
-              placeholder="Search furniture"
-              className="pl-10 pr-4 py-2 bg-gray-50 border border-transparent rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
-            />
-          </div>
-                          <CartIcon />
-
-         <a href='/landing/cart' className="text-gray-700 hover:text-black transition-colors relative">
-  <ShoppingCart size={24} />
-  {cart.length > 0 && (
-    <span className="absolute -top-2 -right-2 bg-[#c8ad93] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center font-medium">
-      {cart.reduce((total, item) => total + item.qty, 0)}
-    </span>
-  )}
-</a>
-          <Button>
-            <a href="/auth/login">Login</a>
-          </Button>
-        </div>
-      </nav> */}
+ 
       <div className="bg-gray-50 min-h-screen p-4 md:p-8">
         <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 

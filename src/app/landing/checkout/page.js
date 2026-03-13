@@ -70,7 +70,7 @@ const page = () => {
     });
 
     // ✅ Fetch cart items to display in summary
-    axios.get(`http://127.0.0.1:8000/api/Sales/${userId}`, { headers: getHeaders() })
+    axios.get(`http://127.0.0.1:8000/api/sales/${userId}`, { headers: getHeaders() })
       .then(res => {
         const items = Array.isArray(res.data) ? res.data : res.data.orders ?? [];
         setCartItems(items);
@@ -95,7 +95,7 @@ const page = () => {
 
       // ✅ POST to create_order — this creates orders + saves payment in one call
       const res = await axios.post(
-        `http://127.0.0.1:8000/api/Sales/create_order/${customerId}`,
+        `http://127.0.0.1:8000/api/sales/create_order/${customerId}`,
         {
           cardholder:  form.cardholder,
           card_number: form.card_number,   // backend extracts last 4 digits

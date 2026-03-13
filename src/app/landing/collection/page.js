@@ -135,55 +135,54 @@ const handleAddToCart = async (product) => {
   }
 
   const payload = JSON.parse(atob(token.split(".")[1]));
-  localStorage.setItem("user_id", payload.user_id);
-  localStorage.setItem("user_email", payload.sub);
-  localStorage.setItem("user_role", payload.role);
-
   const customerId = payload.user_id;
 
-  try {
-    await axios.post("http://127.0.0.1:8000/api/Sales/add", {
-      product_id: product.ProductID,
-      customer_id: customerId,
-      quantity: 1,
-      subtotal: product.price,
-      discount: 0.0
-    }, { headers: getHeaders() });
+  localStorage.setItem("user_id",    payload.user_id);
+  localStorage.setItem("user_email", payload.sub);
+  localStorage.setItem("user_role",  payload.role);
 
-    // Notify navigation bar to update counts
+  try {
+    await axios.post(
+      "http://127.0.0.1:8000/api/sales/add",   // ← lowercase 's'
+      {
+        product_id:  product.ProductID,
+        customer_id: customerId,
+        quantity:    1,
+        subtotal:    product.price,
+        discount:    0.0,
+      },
+      { headers: getHeaders() }
+    );
+
     window.dispatchEvent(new Event("cartUpdated"));
 
-    // update badge
-    setCart((prevCart) => {
-      const existing = prevCart.find(item => item.ProductID === product.ProductID);
+    setCart((prev) => {
+      const existing = prev.find((i) => i.ProductID === product.ProductID);
       if (existing) {
-        return prevCart.map(item =>
-          item.ProductID === product.ProductID
-            ? { ...item, qty: item.qty + 1 }
-            : item
+        return prev.map((i) =>
+          i.ProductID === product.ProductID ? { ...i, qty: i.qty + 1 } : i
         );
-      } else {
-        return [...prevCart, { ...product, qty: 1 }];
       }
+      return [...prev, { ...product, qty: 1 }];
     });
 
   } catch (error) {
-    console.error("Failed to add to cart:", error);
+    console.error("Failed to add to cart:", error.response?.data || error.message);
   }
 };
     // Redundant cart count logic removed as ClientNav handles it
-    const CartIcon = () => (
-        <a href="/landing/cart" className="relative cursor-pointer">
-            <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M.583.583h2.333l1.564 7.81a1.17 1.17 0 0 0 1.166.94h5.67a1.17 1.17 0 0 0 1.167-.94l.933-4.893H3.5m2.333 8.75a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0m6.417 0a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0" stroke="#060e19" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            {cartCount > 0 && (
-                <span className="absolute -top-2 -right-3 text-xs text-white bg-[#c8ad93] w-[18px] h-[18px] rounded-full flex items-center justify-center">
-                    {cartCount > 99 ? '99+' : cartCount}
-                </span>
-            )}
-        </a>
-    )
+    // const CartIcon = () => (
+    //     <a href="/landing/cart" className="relative cursor-pointer">
+    //         <svg width="18" height="18" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    //             <path d="M.583.583h2.333l1.564 7.81a1.17 1.17 0 0 0 1.166.94h5.67a1.17 1.17 0 0 0 1.167-.94l.933-4.893H3.5m2.333 8.75a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0m6.417 0a.583.583 0 1 1-1.167 0 .583.583 0 0 1 1.167 0" stroke="#060e19" strokeLinecap="round" strokeLinejoin="round" />
+    //         </svg>
+    //         {cartCount > 0 && (
+    //             <span className="absolute -top-2 -right-3 text-xs text-white bg-[#c8ad93] w-[18px] h-[18px] rounded-full flex items-center justify-center">
+    //                 {cartCount > 99 ? '99+' : cartCount}
+    //             </span>
+    //         )}
+    //     </a>
+    // )
   return (
     <div className="px-4 md:px-16">
 
