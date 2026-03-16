@@ -23,6 +23,10 @@ import {
 import { Package, History, RefreshCcw, ArrowUpDown, TrendingUp, TrendingDown, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { SectionCards } from "@/components/section-cards"
+import { DataTable } from "@/components/data-table"
+
+
 
 const API_BASE = ""
 
@@ -91,8 +95,22 @@ export default function InventoryPage() {
   const totalProducts = stockStatus.length
 
   return (
-    <div className="p-8 space-y-8 bg-gray-50/50 min-h-screen">
-      {/* Header */}
+    <div className="@container/main flex flex-1 flex-col gap-2">
+      {/* <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">  */}
+      <div className=" w-full grid grid-cols-2 md:grid-cols-4 py-4 gap-4">
+  {/* <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 px-4 lg:px-6 py-4"> */}
+
+    {[
+      { id: 1, title: "Total Products", value: totalProducts },
+      { id: 2, title: "Low Stock (≤5)", value: lowStockCount },
+      { id: 3, title: "Out of Stock", value: outOfStockCount },
+    ].map((c) => (
+      <SectionCards key={c.id} title={c.title} value={c.value} />
+    ))}
+       </div>
+
+
+       {/* Header 
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-[#1e3753]">Inventory Management</h1>
@@ -101,38 +119,11 @@ export default function InventoryPage() {
         <Button onClick={fetchData} variant="outline" className="flex items-center gap-2">
           <RefreshCcw className="w-4 h-4" /> Refresh
         </Button>
-      </div>
+      </div>*/}
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4 shadow-sm">
-          <div className="bg-blue-100 p-3 rounded-lg">
-            <Package className="w-6 h-6 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Total Products</p>
-            <p className="text-2xl font-bold text-[#1e3753]">{totalProducts}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4 shadow-sm">
-          <div className="bg-yellow-100 p-3 rounded-lg">
-            <AlertTriangle className="w-6 h-6 text-yellow-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Low Stock (≤5)</p>
-            <p className="text-2xl font-bold text-yellow-600">{lowStockCount}</p>
-          </div>
-        </div>
-        <div className="bg-white rounded-xl border p-5 flex items-center gap-4 shadow-sm">
-          <div className="bg-red-100 p-3 rounded-lg">
-            <Package className="w-6 h-6 text-red-600" />
-          </div>
-          <div>
-            <p className="text-sm text-gray-500">Out of Stock</p>
-            <p className="text-2xl font-bold text-red-600">{outOfStockCount}</p>
-          </div>
-        </div>
-      </div>
+     
+ 
 
       <Tabs defaultValue="status" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-2">
@@ -145,6 +136,9 @@ export default function InventoryPage() {
         </TabsList>
 
         {/* Stock Status Tab */}
+        {/* <DataTable   /> */}
+
+
         <TabsContent value="status" className="mt-6">
           <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
             {isLoading ? (
@@ -328,6 +322,7 @@ export default function InventoryPage() {
           </div>
         </TabsContent>
       </Tabs>
-    </div>
+        </div>
+  
   )
 }

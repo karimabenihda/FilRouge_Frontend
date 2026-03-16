@@ -22,6 +22,19 @@ import {
 } from "lucide-react"
 import { toast } from "sonner"
 
+import { IconTrendingDown, IconTrendingUp } from "@tabler/icons-react"
+
+import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+
+
 // ─── Exact URLs from Swagger ──────────────────────────────────────────────────
 const URLS = {
   allOrders:      "/api/orders/orders/all",
@@ -171,21 +184,47 @@ export default function OrdersPage() {
           <RefreshCcw className="w-4 h-4" /> Refresh
         </Button>
       </div>
-
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: "Total Orders", value: counts.total,                                      color: "text-[#1e3753]",   bg: "bg-blue-50"   },
-          { label: "Pending",      value: counts.pending    ?? 0,                            color: "text-yellow-600", bg: "bg-yellow-50" },
-          { label: "In Transit",   value: (counts.shipped ?? 0) + (counts.delivering ?? 0), color: "text-orange-600", bg: "bg-orange-50" },
-          { label: "Delivered",    value: counts.delivered  ?? 0,                            color: "text-green-600",  bg: "bg-green-50"  },
-        ].map((c) => (
-          <div key={c.label} className={`${c.bg} rounded-xl border p-5 shadow-sm`}>
-            <p className="text-sm text-gray-500">{c.label}</p>
-            <p className={`text-3xl font-bold mt-1 ${c.color}`}>{c.value}</p>
+ 
+      {/* Summary cards</div>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4"> */} 
+    <div className="@container/main flex flex-1 flex-col gap-2">
+    <div 
+      // className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      className="*:data-[slot=card]:from-[#c8ad93]/25  grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+      {[
+        { label: "Total Orders", value: counts.total},                                   
+        { label: "Pending",      value: counts.pending    ?? 0},
+        { label: "In Transit",   value: (counts.shipped ?? 0) + (counts.delivering ?? 0)},
+        { label: "Delivered",    value: counts.delivered  ?? 0 },
+      ].map((c) => (
+      <Card className="@container/card" key={c.label}>
+        <CardHeader>
+          <CardDescription className="text-[#5c6f91]">{c.label}</CardDescription>
+          <CardTitle className="text-[#101828]  text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
+            {c.value}
+            </CardTitle>
+         {/* */}   <CardAction>
+          <Badge  className="text-[#1e3753]" variant="outline">
+              <IconTrendingUp />
+              +12.5%
+            </Badge>
+          </CardAction> 
+        </CardHeader>
+        <CardFooter className="flex-col items-start gap-1.5 text-sm">
+          <div className="text-[#101828] line-clamp-1 flex gap-2 font-medium">
+            Trending up this month <IconTrendingUp className="text-[#101828] size-4" />
           </div>
-        ))}
-      </div>
+          <div className="text-[#5c6f91] text-muted-foreground">
+            Visitors for the last 6 months
+          </div>
+        </CardFooter>
+      </Card>
+       ))}
+    </div>
+</div>
+
+      
+     
 
       {/* Filters */}
       <div className="bg-white rounded-xl border shadow-sm p-4 flex flex-col sm:flex-row gap-3">
