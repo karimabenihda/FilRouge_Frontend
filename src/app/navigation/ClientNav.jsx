@@ -1,6 +1,6 @@
 "use client"
 import { Button } from '@/components/ui/button'
-import { Search, Package, ShoppingCart } from 'lucide-react'
+import { Search, Package, ShoppingCart, LayoutDashboard } from 'lucide-react'
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
 
@@ -8,11 +8,24 @@ function ClientNav() {
     const [open, setOpen] = useState(false)
     const [cartCount, setCartCount] = useState(0)
     const [orderCount, setOrderCount] = useState(0)
+    const [role, setRole] = useState(null)
 
     const getHeaders = () => {
         const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
         return token ? { Authorization: `Bearer ${token}` } : {};
     };
+
+    // ── Decode JWT and get role ───────────────────────────────────────────────
+    useEffect(() => {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            setRole(payload.role ?? null);
+        } catch {
+            setRole(null);
+        }
+    }, []);
 
     const fetchCounts = async () => {
         const userId = typeof window !== 'undefined' ? localStorage.getItem("user_id") : null;
@@ -21,7 +34,6 @@ function ClientNav() {
         const headers = getHeaders();
 
         try {
-            // Fetch Cart Count
             try {
                 const cartRes = await axios.get(`http://127.0.0.1:8000/api/sales/${userId}`, { headers })
                 setCartCount(cartRes.data.length || 0)
@@ -30,7 +42,6 @@ function ClientNav() {
                 else console.error("Error fetching cart count:", err)
             }
 
-            // Fetch Order Count
             try {
                 const orderRes = await axios.get(`http://127.0.0.1:8000/api/sales/get_orders/${userId}`, { headers })
                 setOrderCount(orderRes.data.orders?.length || 0)
@@ -45,8 +56,6 @@ function ClientNav() {
 
     useEffect(() => {
         fetchCounts();
-
-        // Listen for global cart updates
         const handleUpdate = () => fetchCounts();
         window.addEventListener("cartUpdated", handleUpdate);
         return () => window.removeEventListener("cartUpdated", handleUpdate);
@@ -67,15 +76,20 @@ function ClientNav() {
 
     const AuthButton = ({ className = "" }) => (
         isAuthenticated ? (
-            <Button onClick={handleLogout} className={className}>
-                Logout
-            </Button>
+            <Button onClick={handleLogout} className={className}>Logout</Button>
         ) : (
             <Button className={className}>
                 <a href="/auth/login">Login</a>
             </Button>
         )
     );
+
+    // ── Dashboard icon for admin ──────────────────────────────────────────────
+    const DashboardIcon = () => (
+        <a href="/dashboard" className="relative cursor-pointer text-gray-700 hover:text-[#091422] transition-colors" title="Dashboard">
+            <LayoutDashboard size={20} />
+        </a>
+    )
 
     const TrackingIcon = () => (
         <a href="/landing/orderTracking" className="relative cursor-pointer text-gray-700 hover:text-[#091422] transition-colors">
@@ -99,6 +113,16 @@ function ClientNav() {
         </a>
     )
 
+    // ── Render cart/tracking OR dashboard based on role ───────────────────────
+    const NavIcons = () => (
+        role === "admin"
+            ? <DashboardIcon />
+            : <>
+                <CartIcon />
+                <TrackingIcon />
+              </>
+    )
+
     return (
         <nav className="flex justify-between items-center max-w-6xl mx-auto py-3.5 border-b border-slate-200/20 w-full">
             <img src="/images/logo/elan.png" className='h-10 -mt-3' />
@@ -109,17 +133,7 @@ function ClientNav() {
                 <a href="/landing/collection">Collections</a>
                 <a href="/landing/Contact">Contact</a>
 
-                <div className="relative w-full md:w-50 text-gray-600">
-                    {/* <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Search furniture"
-                        className="pl-10 pr-4 py-2 border bg-white rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
-                    /> */}
-                </div>
-
-                <CartIcon />
-                <TrackingIcon />
+                <NavIcons />
                 <AuthButton />
             </div>
 
@@ -135,17 +149,12 @@ function ClientNav() {
             <div className={`${open ? 'flex' : 'hidden'} space-y-2 text-[#1e3753] absolute top-[60px] left-0 w-full bg-white z-14 shadow-md py-4 flex-col items-start gap-2 px-5 text-sm md:hidden`}>
                 <div className="relative w-full md:w-50 text-gray-600">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-                    {/* <input
-                        type="text"
-                        placeholder="Search furniture"
-                        className="pl-10 pr-4 py-2 border bg-white rounded-full focus:outline-none focus:bg-white focus:border-gray-200 w-full transition-all"
-                    /> */}
                 </div>
                 <a href="/" className="block">Home</a>
                 <a href="/landing/collection" className="block">Collections</a>
                 <a href="/landing/Contact" className="block">Contact</a>
-                <CartIcon />
-                <TrackingIcon />
+
+                <NavIcons />
                 <AuthButton className="-ml-1" />
             </div>
         </nav>

@@ -39,7 +39,7 @@ const Page = () => {
         if (payload.role === "admin") {
           router.push('/dashboard');
         } else if (payload.role === "client"){
-          router.push('/landing/collection'); 
+          router.push('/'); 
         } else {
           console.log('Unknown role:', payload.role);
         }

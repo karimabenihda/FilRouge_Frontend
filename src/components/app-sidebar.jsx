@@ -1,212 +1,96 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
-
-import { NavDocuments } from "@/components/nav-documents"
-import { NavMain } from "@/components/nav-main"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+import * as React from "react";
+import { usePathname } from "next/navigation";
+import { IconChartBar, IconDashboard, IconUsers } from "@tabler/icons-react";
+import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { Archive, Armchair, ShoppingCart, Tag, View, Warehouse } from "lucide-react"
+} from "@/components/ui/sidebar";
+import { Armchair, ShoppingCart, Tag, Warehouse } from "lucide-react";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "/dashboard",
-      icon: IconDashboard,
-    },
-    {
-      title: "Furnitures",
-      url: "/dashboard/admin/furnitures",
-      icon: Armchair,
-    },
-    {
-      title: "Inventory",
-      url: "/dashboard/admin/inventory",
-      icon: Warehouse,
-    },
-    {
-      title: "Sales",
-      url: "/dashboard/admin/sales",
-      icon: Tag ,
-    },
-    {
-      title: "Orders",
-      url: "/dashboard/admin/orders",
-      icon: ShoppingCart,
-    },
-    {
-      title: "Analytics",
-      url: "/dashboard/admin/analytics",
-      icon: IconChartBar,
-    },
-    {
-      title: "Users",
-      url: "/dashboard/admin/users",
-      icon: IconUsers,
-    },
-
-
-    {
-      title: "Reviews",
-      url: "/dashboard/admin/reviews",
-      icon: View,
-    // },  {
-    //   title: "Reviews",
-    //   url: "/dashboard/admin/reviews",
-    //   icon: View,
-    },
-
+const navItems = {
+  main: [
+    { title: "Dashboard", url: "/dashboard", icon: IconDashboard },
+    { title: "Furnitures", url: "/dashboard/admin/furnitures", icon: Armchair },
+    { title: "Inventory", url: "/dashboard/admin/inventory", icon: Warehouse },
   ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
+  secondary: [
+    { title: "Sales", url: "/dashboard/admin/sales", icon: Tag },
+    { title: "Orders", url: "/dashboard/admin/orders", icon: ShoppingCart },
+    { title: "Analytics", url: "/dashboard/admin/analytics", icon: IconChartBar },
+    { title: "Users", url: "/dashboard/admin/users", icon: IconUsers },
   ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "/dashboard/admin/settings",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
+};
+
+export function AppSidebar({ ...props }) {
+  const pathname = usePathname();
+  const [mounted, setMounted] = React.useState(false);
+  const [user, setUser] = React.useState({
+    name: "Loading...",
+    email: "",
+    avatar: "",
+  });
+
+  React.useEffect(() => {
+    setMounted(true);
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      try {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const payload = JSON.parse(window.atob(base64));
 
 
-  documents: [
-    {
-      name: "Archive",
-      url: "/dashboard/admin/archive",
-      icon: Archive,
-    },
-    {
-      name: "Data",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
-}
+        const firstName = payload.user_firstname || "";
+        const lastName = payload.user_lastname || "";
+        const email = payload.user_email || "";
 
-export function AppSidebar({
-  ...props
-}) {
+        setUser({
+          name: `${firstName} ${lastName}`.trim() || "Admin",
+          email: email,
+          avatar: `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=c8ad93&color=fff`,
+        });
+      } catch (error) {
+        console.error("Error decoding token:", error);
+      }
+    } else {
+      console.warn("No token found in localStorage");
+    }
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <Sidebar collapsible="offcanvas" {...props}>
+    <Sidebar collapsible="offcanvas" {...props} className="border-r border-[#c8ad93]/10">
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-             {/* <SidebarGroupLabel className="flex justify-center">
-            <img src="/images/logo/elan.png" alt="" className="h-15 my-3" />
-          </SidebarGroupLabel> */}
-            <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5 h-full">
-              <a href="/">
-    <img src="/images/logo/elan.png" alt="" className="h-15 m-auto " />
-                   </a>
+            <SidebarMenuButton asChild className="h-20 hover:bg-transparent">
+              <a href="/dashboard">
+                <img src="/images/logo/elan.png" alt="Logo" className="h-12 m-auto" />
+              </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent className="text-[#101828]" >
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+
+      <SidebarContent className="text-[#101828] px-2">
+        <NavMain items={navItems.main} activepath={pathname} />
+        <NavSecondary items={navItems.secondary} activepath={pathname} />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
+
+      <SidebarFooter className="border-t border-[#c8ad93]/10">
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );
