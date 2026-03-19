@@ -11,6 +11,9 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import FurnitureForm from "./FurnitureForm"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
+import { MoreHorizontal, Plus, RefreshCcw } from "lucide-react"
+
 import {
   Select,
   SelectContent,
@@ -28,7 +31,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Pencil, Trash2, Eye, Layers, Tag, RefreshCcw } from "lucide-react"
+import {   Eye, Layers, Tag } from "lucide-react"
 import axios from "axios"
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
@@ -316,26 +319,29 @@ export default function FurnituresPage() {
                             <Eye size={12} /> {f.views ?? 0}
                           </div>
                         </TableCell>
-                        <TableCell className="text-right space-x-1">
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                            onClick={() => {
+      {/* <TableCell className="text-right space-x-1"> */}
+              <TableCell className="text-right">
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem  onClick={() => {
                               setSelectedFurniture({ ...f, subcategory_id: f.subcategory_id })
                               setIsEditDialogOpen(true)
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            onClick={() => handleDeleteFurniture(f.ProductID)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            }}>
+                                        Update
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="text-red-600"  onClick={() => handleDeleteFurniture(f.ProductID)}>
+                                        Delete
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                {/* </TableCell> */}
+
+                      
                         </TableCell>
                       </TableRow>
                     ))

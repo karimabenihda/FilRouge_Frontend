@@ -176,12 +176,9 @@ export default function OrdersPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-[#1e3753]">Orders Management</h1>
-          <p className="text-gray-500 mt-1">Track and manage all customer orders.</p>
-        </div>
+   
         <Button onClick={fetchOrders} variant="outline" className="flex items-center gap-2">
-          <RefreshCcw className="w-4 h-4" /> Refresh
+          <RefreshCcw   /> Refresh
         </Button>
       </div>
  

@@ -34,7 +34,7 @@ export function NavMain({ items }) {
                     active:scale-95 active:duration-75
                     /* Focused/Selected State */
                     ${isActive 
-                      ? "bg-[#c8ad93]/15 text-[#1e3753] font-bold" 
+                      ? "bg-[#c8ad93]/15 text-[#091422] font-bold" 
                       : "text-[#101828] opacity-80"
                     }
                   `}
@@ -55,12 +55,12 @@ export function NavMain({ items }) {
                         className={`
                          transition-all duration-300
                           group-hover:scale-125 group-hover:text-[#c8ad93]
-                          ${isActive ? "scale-110 text-[#c8ad93] drop-shadow-sm" : "text-[#1e3753]"}
+                          ${isActive ? "scale-110 text-[#c8ad93] drop-shadow-sm" : "text-[#091422]"}
                         `}
                       />
                     )}
                     
-                    <span className="transition-colors duration-300 font-medium group-hover:text-[#1e3753]">
+                    <span className="transition-colors duration-300 font-medium group-hover:text-[#091422]">
                       {item.title}
                     </span>
                   </a>

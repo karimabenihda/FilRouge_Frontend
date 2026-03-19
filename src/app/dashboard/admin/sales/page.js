@@ -131,14 +131,7 @@ export default function SalesPage() {
   return (
     <div className="p-6 space-y-6">
 
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-[#1e3753]">Sales Analytics</h1>
-        <p className="text-sm text-muted-foreground">
-          Monthly and yearly sales performance.
-        </p>
-      </div>
-
+    
       {/* Summary cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[

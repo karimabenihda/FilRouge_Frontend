@@ -31,7 +31,7 @@ export function NavSecondary({ items, ...props }) {
                     hover:bg-[#c8ad93]/10 hover:translate-x-1
                     active:scale-95 active:duration-75
                     ${isActive 
-                      ? "bg-[#c8ad93]/10 text-[#1e3753] font-semibold shadow-[inset_0_0_0_1px_rgba(200,173,147,0.2)]" 
+                      ? "bg-[#c8ad93]/10 text-[#091422] font-semibold shadow-[inset_0_0_0_1px_rgba(200,173,147,0.2)]" 
                       : "text-[#101828] opacity-70"
                     }
                   `}
@@ -51,7 +51,7 @@ export function NavSecondary({ items, ...props }) {
                       className={`
                          transition-all duration-300
                         group-hover:text-[#c8ad93]
-                        ${isActive ? "text-[#c8ad93]" : "text-[#1e3753]"}
+                        ${isActive ? "text-[#c8ad93]" : "text-[#091422]"}
                       `}
                     />
                     

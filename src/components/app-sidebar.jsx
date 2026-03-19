@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { usePathname } from "next/navigation";
-import { IconChartBar, IconDashboard, IconUsers } from "@tabler/icons-react";
+import { IconChartBar, IconDashboard, IconUsers,IconUser } from "@tabler/icons-react";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
@@ -28,6 +28,8 @@ const navItems = {
     { title: "Orders", url: "/dashboard/admin/orders", icon: ShoppingCart },
     { title: "Analytics", url: "/dashboard/admin/analytics", icon: IconChartBar },
     { title: "Users", url: "/dashboard/admin/users", icon: IconUsers },
+    { title: "Profile", url: "/dashboard/admin/settings", icon: IconUser },
+
   ],
 };
 
