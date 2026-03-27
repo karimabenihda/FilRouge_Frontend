@@ -8,12 +8,15 @@ const bodoni = Bodoni_Moda({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-bodoni",
+  preload: false,
 });
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-dm",
+  preload: false,
+
 });
 
 export const metadata = {

@@ -1,0 +1,21 @@
+# Node Dependencies
+node_modules/
+.npm/
+
+# Build Outputs
+dist/
+build/
+.next/
+.nuxt/
+out/
+
+# Testing & Logs
+coverage/
+*.log
+.eslintcache
+
+# Git & IDE
+.git/
+.vscode/
+.idea/
+.DS_Store

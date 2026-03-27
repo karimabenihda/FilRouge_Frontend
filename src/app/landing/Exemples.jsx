@@ -10,9 +10,9 @@ function Exemples() {
   const categories = {
     Living: {
       slides: [
-        "/images/exempls/living/living1.jfif",
-        "/images/exempls/living/living2.jfif",
-        "/images/exempls/living/living3.jfif",
+        "/images/exempls/living/Mockup living room interior_.jfif",
+        "/images/exempls/living/téléchargement (7).jfif",
+        "/images/exempls/living/téléchargement (6).jfif",
       ],
       title: "Living Room Collection",
       description:
@@ -20,9 +20,9 @@ function Exemples() {
     },
     Bedroom: {
       slides: [
-        "/images/exempls/bedroom/bedroom.jfif",
-        "/images/exempls/bedroom/bedroom2.jfif",
-        "/images/exempls/bedroom/bedroom3.jfif",
+        "/images/exempls/bedroom/Micadoni Ecksofa ERIN 4 Sitzplaetze Blau Samt 168 x 79 x 295cm Ecke davorstehend links.jfif",
+        "/images/exempls/bedroom/Antonio Lupi Anima Liquida Living.jfif",
+        "/images/exempls/bedroom/Kroc I Midnight Blue Nightstand.jfif",
       ],
       title: "Bedroom Collection",
       description:
@@ -30,9 +30,9 @@ function Exemples() {
     },
     Kitchen: {
       slides: [
-        "/images/exempls/kitchen1.jpg",
-        "/images/exempls/kitchen2.jpg",
-        "/images/exempls/kitchen3.jpg",
+        "/images/exempls/kitchen/img1.jpg",
+        "/images/exempls/kitchen/img2.jpg",
+        "/images/exempls/kitchen/téléchargement (1).jfif",
       ],
       title: "Kitchen & Dining Collection",
       description:
@@ -40,9 +40,9 @@ function Exemples() {
     },
     Office: {
       slides: [
-        "/images/exempls/office1.jpg",
-        "/images/exempls/office2.jpg",
-        "/images/exempls/office3.jpg",
+        "/images/exempls/office/téléchargement (4).jfif",
+        "/images/exempls/office/téléchargement (3).jfif",
+        "/images/exempls/office/téléchargement (2).jfif",
       ],
       title: "Home Office Collection",
       description:
@@ -50,8 +50,8 @@ function Exemples() {
     },
     Decor: {
       slides: [
-        "/images/exempls/decor/decor.jfif",
-        "/images/exempls/decor/decor2.jfif",
+        "/images/exempls/decor/téléchargement (5).jfif",
+        "/images/exempls/decor/Minimalist Textured Wall Decor 3d Vision Board Wood Carving - Etsy Norway.jfif",
         "/images/exempls/decor/decor3.jfif",
       ],
       title: "Home Decor Collection",

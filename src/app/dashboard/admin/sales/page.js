@@ -1,5 +1,5 @@
 "use client"
-
+import { SectionCards }         from "@/components/section-cards"
 import React, { useState, useEffect, useMemo } from "react"
 import axios from "axios"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -164,16 +164,24 @@ export default function SalesPage() {
             sub: "Revenue per order",
           },
         ].map((c) => (
-          <Card key={c.label}>
-            <CardContent className="pt-5">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-sm text-muted-foreground">{c.label}</p>
-                {c.icon}
-              </div>
-              <p className="text-2xl font-bold text-[#1e3753]">{c.value}</p>
-              <p className="text-xs text-muted-foreground mt-1">{c.sub}</p>
-            </CardContent>
-          </Card>
+           <SectionCards  key={c.label}
+                      description="Total Orders"
+                      value={c.value}
+                      percentage="all time"
+                      trending={c.icon}
+                      title={c.label}
+                      footer={c.sub}
+                    />
+        // <Card key={c.label}>
+          //   <CardContent className="pt-5">
+          //     <div className="flex items-center justify-between mb-1">
+          //       <p className="text-sm text-muted-foreground">{c.label}</p>
+          //       {c.icon}
+          //     </div>
+          //     <p className="text-2xl font-bold text-[#1e3753]">{c.value}</p>
+          //     <p className="text-xs text-muted-foreground mt-1">{c.sub}</p>
+          //   </CardContent>
+          // </Card>
         ))}
       </div>
 

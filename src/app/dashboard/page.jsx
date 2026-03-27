@@ -8,14 +8,16 @@ import {
   Table, TableBody, TableCell,
   TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { TrendingUp, TrendingDown, Brain } from "lucide-react"
 
 // ─── Endpoints ────────────────────────────────────────────────────────────────
 const BASE = "http://127.0.0.1:8000"
 const URLS = {
-  stats:     `${BASE}/api/dashboard/stats`,       // → { total_revenue, total_profit, total_orders, pending_orders }
-  chart:     `${BASE}/api/dashboard/chart`,        // → [{ date, revenue, profit }]
-  allOrders: `${BASE}/api/orders/orders/all`,      // → List[AdminOrderItem]
+  stats:      `${BASE}/api/dashboard/stats`,
+  chart:      `${BASE}/api/dashboard/chart`,
+  allOrders:  `${BASE}/api/orders/orders/all`,
+  prediction: `${BASE}/api/prediction/next-month`,
 }
 
 // ─── Status badge colours ─────────────────────────────────────────────────────
@@ -30,29 +32,31 @@ const STATUS_COLOR = {
 }
 
 export default function Page() {
-  const [stats,     setStats]     = useState(null)
-  const [chartData, setChartData] = useState([])
-  const [orders,    setOrders]    = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [stats,      setStats]      = useState(null)
+  const [chartData,  setChartData]  = useState([])
+  const [orders,     setOrders]     = useState([])
+  const [prediction, setPrediction] = useState(null)
+  const [isLoading,  setIsLoading]  = useState(true)
 
   const authHeaders = () => {
     const token = localStorage.getItem("token")
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
 
-  // ── Single parallel fetch on mount ────────────────────────────────────────
   useEffect(() => {
     const load = async () => {
       setIsLoading(true)
       try {
-        const [statsRes, chartRes, ordersRes] = await Promise.all([
-          axios.get(URLS.stats,     { headers: authHeaders() }),
-          axios.get(URLS.chart,     { headers: authHeaders() }),
-          axios.get(URLS.allOrders, { headers: authHeaders() }),
+        const [statsRes, chartRes, ordersRes, predRes] = await Promise.all([
+          axios.get(URLS.stats,      { headers: authHeaders() }),
+          axios.get(URLS.chart,      { headers: authHeaders() }),
+          axios.get(URLS.allOrders,  { headers: authHeaders() }),
+          axios.get(URLS.prediction, { headers: authHeaders() }),
         ])
-        setStats(chartRes.data     ? statsRes.data  : null)
+        setStats(statsRes.data     ?? null)
         setChartData(chartRes.data ?? [])
         setOrders(ordersRes.data   ?? [])
+        setPrediction(predRes.data ?? null)
       } catch (err) {
         console.error("Dashboard fetch error:", err.response?.data || err.message)
       } finally {
@@ -62,7 +66,6 @@ export default function Page() {
     load()
   }, [])
 
-  // ── Last 10 orders for the table ──────────────────────────────────────────
   const recentOrders = useMemo(() => orders.slice(0, 10), [orders])
 
   if (isLoading) {
@@ -73,16 +76,15 @@ export default function Page() {
     )
   }
 
+  const isUp = (prediction?.change_pct ?? 0) >= 0
+
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
-      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 ">
+      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 
-        {/* ── 4 KPI cards ──────────────────────────────────────────────────── */}
-        <div 
-        className=" grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-6 px-4 lg:px-6" 
-        >
-
-          <SectionCards 
+        {/* ── 4 KPI cards ──────────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 gap-6 px-4 lg:px-6">
+          <SectionCards
             description="Total Revenue"
             value={`$${(stats?.total_revenue ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             percentage="+sales"
@@ -90,7 +92,6 @@ export default function Page() {
             title="Gross revenue all time"
             footer="From sales table"
           />
-
           <SectionCards
             description="Total Profit"
             value={`$${(stats?.total_profit ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
@@ -103,7 +104,6 @@ export default function Page() {
             title={(stats?.total_profit ?? 0) >= 0 ? "Profitable" : "In loss"}
             footer="Revenue minus costs"
           />
-
           <SectionCards
             description="Total Orders"
             value={(stats?.total_orders ?? 0).toLocaleString()}
@@ -112,7 +112,6 @@ export default function Page() {
             title="All customer orders"
             footer="Across all statuses"
           />
-
           <SectionCards
             description="Pending Orders"
             value={(stats?.pending_orders ?? 0).toLocaleString()}
@@ -121,15 +120,69 @@ export default function Page() {
             title={(stats?.pending_orders ?? 0) > 0 ? "Requires attention" : "All clear"}
             footer="Awaiting confirmation"
           />
-
         </div>
 
-        {/* ── Revenue & Profit chart ────────────────────────────────────────── */}
+        {/* ── AI Sales Prediction card ──────────────────────────────── */}
+        {prediction && (
+          <div className="px-4 lg:px-6">
+            <Card className="border-l-4 border-l-[#1e3753] bg-gradient-to-r from-[#1e3753]/5 to-transparent">
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-[#1e3753]" />
+                  <CardTitle className="text-[#1e3753]">AI Sales Prediction</CardTitle>
+                </div>
+                <CardDescription>
+                  LSTM model forecast — R² Score:{" "}
+                  <span className="font-semibold text-[#1e3753]">
+                    {(prediction.r2_score * 100).toFixed(1)}%
+                  </span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+
+                  {/* Last month */}
+                  <div className="space-y-1">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">Last Month ({prediction.last_month})</p>
+                    <p className="text-2xl font-bold text-slate-700">
+                      ${prediction.last_month_sales.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  </div>
+
+                  {/* Arrow */}
+                  <div className="flex items-center justify-center">
+                    <div className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl ${isUp ? "bg-green-50" : "bg-red-50"}`}>
+                      {isUp
+                        ? <TrendingUp className="w-6 h-6 text-green-600" />
+                        : <TrendingDown className="w-6 h-6 text-red-600" />
+                      }
+                      <span className={`text-lg font-bold ${isUp ? "text-green-600" : "text-red-600"}`}>
+                        {isUp ? "+" : ""}{prediction.change_pct.toFixed(1)}%
+                      </span>
+                      <span className="text-xs text-gray-400">change</span>
+                    </div>
+                  </div>
+
+                  {/* Next month */}
+                  <div className="space-y-1 text-right">
+                    <p className="text-xs text-gray-400 uppercase tracking-wide">Next Month ({prediction.next_month})</p>
+                    <p className={`text-2xl font-bold ${isUp ? "text-green-600" : "text-red-600"}`}>
+                      ${prediction.predicted_sales.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </p>
+                  </div>
+
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* ── Revenue & Profit chart ────────────────────────────────── */}
         <div className="px-4 lg:px-6">
           <ChartAreaInteractive chartData={chartData} />
         </div>
 
-        {/* ── Recent orders table ───────────────────────────────────────────── */}
+        {/* ── Recent orders table ───────────────────────────────────── */}
         <div className="px-4 lg:px-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -158,9 +211,7 @@ export default function Page() {
                     </TableRow>
                   ) : recentOrders.map((order) => (
                     <TableRow key={order.id} className="hover:bg-gray-50/50">
-                      <TableCell className="font-mono text-sm text-gray-400">
-                        #{order.id}
-                      </TableCell>
+                      <TableCell className="font-mono text-sm text-gray-400">#{order.id}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {order.product_image && (
@@ -176,15 +227,11 @@ export default function Page() {
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-500">
-                        #{order.customer_id}
-                      </TableCell>
+                      <TableCell className="text-sm text-gray-500">#{order.customer_id}</TableCell>
                       <TableCell className="text-right font-semibold text-[#c8ad93]">
                         ${order.totalprice?.toFixed(2)}
                       </TableCell>
-                      <TableCell className="text-right text-gray-600">
-                        {order.product_qte}
-                      </TableCell>
+                      <TableCell className="text-right text-gray-600">{order.product_qte}</TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${STATUS_COLOR[order.status] ?? "bg-gray-100 text-gray-600"}`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}

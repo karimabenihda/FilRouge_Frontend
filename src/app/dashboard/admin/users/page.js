@@ -159,36 +159,36 @@ export default function UsersPage() {
 
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-[#1e3753]">
+        <Card className="border-l-4 border-l-[#5c6f91]">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-[#1e3753]/10 p-3 rounded-full">
-              <Users className="text-[#1e3753] w-5 h-5" />
+            <div className="bg-[#5c6f91]/10 p-3 rounded-full">
+              <Users className="text-[#5c6f91] w-5 h-5" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Total Users</p>
-              <p className="text-3xl font-bold text-[#1e3753]">{stats.total}</p>
+              <p className="text-3xl font-bold text-[#5c6f91]">{stats.total}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-purple-500">
+        <Card className="border-l-4 border-l-[#c8ad93]">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-purple-100 p-3 rounded-full">
-              <ShieldCheck className="text-purple-600 w-5 h-5" />
+            <div className="bg-[#c8ad93] p-3 rounded-full">
+              <ShieldCheck className="text-white w-5 h-5" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Admins</p>
-              <p className="text-3xl font-bold text-purple-600">{stats.admins}</p>
+              <p className="text-3xl font-bold text-[#c8ad93]">{stats.admins}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="border-l-4 border-l-green-500">
+        <Card className="border-l-4 border-l-[#1e3753]">
           <CardContent className="flex items-center gap-4 pt-6">
-            <div className="bg-green-100 p-3 rounded-full">
-              <UserCircle className="text-green-600 w-5 h-5" />
+            <div className="bg-[#1e3753] p-3 rounded-full">
+              <UserCircle className="text-white w-5 h-5" />
             </div>
             <div>
               <p className="text-sm text-gray-500">Clients</p>
-              <p className="text-3xl font-bold text-green-600">{stats.clients}</p>
+              <p className="text-3xl font-bold text-white">{stats.clients}</p>
             </div>
           </CardContent>
         </Card>

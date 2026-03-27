@@ -96,9 +96,11 @@ export default function InventoryPage() {
 
   return (
     <div className="@container/main flex flex-1 flex-col gap-2">
+      <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+    {/* <div className="@container/main flex flex-1 flex-col gap-2"> */}
       {/* <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">  */}
-      <div className=" w-full grid grid-cols-2 md:grid-cols-4 py-4 gap-4">
-  {/* <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 px-4 lg:px-6 py-4"> */}
+      {/* <div className=" w-full grid grid-cols-2 md:grid-cols-4 py-4 gap-4"> */}
+  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 px-4 lg:px-6 py-4">
 
     {[
       { id: 1, title: "Total Products", value: totalProducts },
@@ -107,7 +109,7 @@ export default function InventoryPage() {
     ].map((c) => (
       <SectionCards key={c.id} title={c.title} value={c.value} />
     ))}
-       </div>
+      </div>
 
 
        {/* Header 
@@ -125,7 +127,7 @@ export default function InventoryPage() {
      
  
 
-      <Tabs defaultValue="status" className="w-full">
+      <Tabs defaultValue="status" className="w-full px-4 lg:px-6">
         <TabsList className="grid w-full max-w-md grid-cols-2">
           <TabsTrigger value="status" className="flex items-center gap-2">
             <Package className="w-4 h-4" /> Current Stock
@@ -322,7 +324,8 @@ export default function InventoryPage() {
           </div>
         </TabsContent>
       </Tabs>
-        </div>
-  
+        </div> 
+      </div>
+
   )
 }
